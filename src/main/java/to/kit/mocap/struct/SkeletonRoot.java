@@ -1,10 +1,27 @@
 package to.kit.mocap.struct;
 
-public class SkeletonRoot {
+import java.awt.Graphics2D;
+
+public class SkeletonRoot extends SkeletonNode {
 	private String order;
 	private String axis;
-	private String position;
+	private double[] position;
 	private String orientation;
+
+	public SkeletonRoot(String name) {
+		setName(name);
+	}
+
+	public P3D getPoint() {
+		P3D p;
+
+		if (this.position != null && 3 <= this.position.length) {
+			p = new P3D(this.position[0], this.position[1], this.position[2]);
+		} else {
+			p = new P3D(0, 0, 0);
+		}
+		return p;
+	}
 
 	/**
 	 * @return the order
@@ -33,13 +50,13 @@ public class SkeletonRoot {
 	/**
 	 * @return the position
 	 */
-	public String getPosition() {
+	public double[] getPosition() {
 		return this.position;
 	}
 	/**
 	 * @param position the position to set
 	 */
-	public void setPosition(String position) {
+	public void setPosition(double[] position) {
 		this.position = position;
 	}
 	/**
@@ -53,5 +70,14 @@ public class SkeletonRoot {
 	 */
 	public void setOrientation(String orientation) {
 		this.orientation = orientation;
+	}
+
+	@Override
+	public void draw(Graphics2D g, P3D pt) {
+		P3D nextPt = getPoint();
+
+		for (SkeletonNode node : getJoint()) {
+			node.draw(g, nextPt);
+		}
 	}
 }

@@ -1,11 +1,9 @@
 package to.kit.mocap;
 
-import java.awt.Canvas;
+import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -13,6 +11,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 
+import to.kit.mocap.component.MocapCanvas;
 import to.kit.mocap.struct.Skeleton;
 import to.kit.mocap.struct.SkeletonLoader;
 
@@ -22,7 +21,16 @@ import to.kit.mocap.struct.SkeletonLoader;
  */
 public class MocapPlayerMain extends JFrame {
 	private JFileChooser chooser = new JFileChooser();
-	private List<Skeleton> skeletonList = new ArrayList<>();
+	private MocapCanvas canvas = new MocapCanvas();
+
+	private void loadSkeleton(File file) {
+		SkeletonLoader loader = new SkeletonLoader();
+		Skeleton skeleton = loader.load(file);
+
+		if (skeleton != null) {
+			this.canvas.add(skeleton);
+		}
+	}
 
 	protected void openFile() {
 		int res = this.chooser.showOpenDialog(this);
@@ -31,12 +39,8 @@ public class MocapPlayerMain extends JFrame {
 			return;
 		}
 		File file = this.chooser.getSelectedFile();
-		SkeletonLoader loader = new SkeletonLoader();
-		Skeleton skeleton = loader.load(file);
 
-		if (skeleton != null) {
-			this.skeletonList.add(skeleton);
-		}
+		loadSkeleton(file);
 	}
 
 	public MocapPlayerMain() {
@@ -44,11 +48,10 @@ public class MocapPlayerMain extends JFrame {
 		setBounds(0, 0, 640, 480);
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		getContentPane().setLayout(null);
+		getContentPane().setLayout(new BorderLayout(0, 0));
 		
 		JMenuBar menuBar = new JMenuBar();
-		menuBar.setBounds(0, 0, 624, 21);
-		getContentPane().add(menuBar);
+		getContentPane().add(menuBar, BorderLayout.PAGE_START);
 		
 		JMenu mnFile = new JMenu("File");
 		menuBar.add(mnFile);
@@ -69,10 +72,8 @@ public class MocapPlayerMain extends JFrame {
 			}
 		});
 		mnFile.add(mntmExit);
-		
-		Canvas canvas = new Canvas();
-		canvas.setBounds(0, 20, 624, 421);
-		getContentPane().add(canvas);
+
+		getContentPane().add(this.canvas, BorderLayout.CENTER);
 	}
 
 	public static void main(String[] args) {
