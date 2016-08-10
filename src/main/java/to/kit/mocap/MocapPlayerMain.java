@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.List;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -12,6 +13,8 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 
 import to.kit.mocap.component.MocapCanvas;
+import to.kit.mocap.struct.Motion;
+import to.kit.mocap.struct.MotionLoader;
 import to.kit.mocap.struct.Skeleton;
 import to.kit.mocap.struct.SkeletonLoader;
 
@@ -32,6 +35,13 @@ public class MocapPlayerMain extends JFrame {
 		}
 	}
 
+	private void loadMotion(File file) {
+		MotionLoader loader = new MotionLoader();
+		List<Motion> motionList = loader.load(file);
+
+		this.canvas.add(motionList);
+	}
+
 	protected void openFile() {
 		int res = this.chooser.showOpenDialog(this);
 
@@ -39,8 +49,13 @@ public class MocapPlayerMain extends JFrame {
 			return;
 		}
 		File file = this.chooser.getSelectedFile();
+		String name = file.getName().toLowerCase();
 
-		loadSkeleton(file);
+		if (name.endsWith(".asf")) {
+			loadSkeleton(file);
+		} else if (name.endsWith(".amc")) {
+			loadMotion(file);
+		}
 	}
 
 	public MocapPlayerMain() {

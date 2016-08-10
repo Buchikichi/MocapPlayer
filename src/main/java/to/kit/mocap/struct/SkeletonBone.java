@@ -50,6 +50,42 @@ public class SkeletonBone extends SkeletonNode {
 		this.tZ = values[2];
 	}
 	/**
+	 * @return the tX
+	 */
+	public double gettX() {
+		return this.tX;
+	}
+	/**
+	 * @param tX the tX to set
+	 */
+	public void settX(double tX) {
+		this.tX = tX;
+	}
+	/**
+	 * @return the tY
+	 */
+	public double gettY() {
+		return this.tY;
+	}
+	/**
+	 * @param tY the tY to set
+	 */
+	public void settY(double tY) {
+		this.tY = tY;
+	}
+	/**
+	 * @return the tZ
+	 */
+	public double gettZ() {
+		return this.tZ;
+	}
+	/**
+	 * @param tZ the tZ to set
+	 */
+	public void settZ(double tZ) {
+		this.tZ = tZ;
+	}
+	/**
 	 * @return the length
 	 */
 	public double getLength() {

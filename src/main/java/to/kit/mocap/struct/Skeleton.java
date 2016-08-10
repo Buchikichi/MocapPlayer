@@ -14,9 +14,6 @@ public class Skeleton {
 	private SkeletonRoot root;
 	private Map<String, SkeletonNode> nodeMap = new HashMap<>();
 
-	private void drawNode() {
-	}
-
 	public void add(SkeletonRoot rootNode) {
 		this.root = rootNode;
 		this.nodeMap.put(rootNode.getName(), rootNode);
@@ -41,6 +38,29 @@ public class Skeleton {
 			SkeletonNode childNode = this.nodeMap.get(child);
 
 			parentNode.add(childNode);
+		}
+	}
+
+	public void shift(Motion motion) {
+		for (MotionBone bone : motion) {
+			String name = bone.getName();
+
+			if (!this.nodeMap.containsKey(name)) {
+				LOG.error("Bad parent name [{}].", name);
+				continue;
+			}
+			SkeletonBone node = (SkeletonBone)this.nodeMap.get(name);
+			Double tx = bone.getThetaX();
+			Double ty = bone.getThetaY();
+			Double tz = bone.getThetaZ();
+
+			node.settX(tx.doubleValue());
+			if (ty != null) {
+				node.settY(ty.doubleValue());
+			}
+			if (tz != null) {
+				node.settZ(tz.doubleValue());
+			}
 		}
 	}
 
