@@ -7,20 +7,22 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Skeleton {
+public final class Skeleton {
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(Skeleton.class);
 
 	private SkeletonRoot root;
 	private Map<String, SkeletonNode> nodeMap = new HashMap<>();
-
-	public void add(SkeletonRoot rootNode) {
-		this.root = rootNode;
-		this.nodeMap.put(rootNode.getName(), rootNode);
-	}
+	double rotateY;
 
 	public void add(SkeletonNode node) {
-		this.nodeMap.put(node.getName(), node);
+		String name = node.getName();
+
+		node.setSkeleton(this);
+		if (node instanceof SkeletonRoot) {
+			this.root = (SkeletonRoot) node;
+		}
+		this.nodeMap.put(name, node);
 	}
 
 	public void addHierarchy(String parent, String[] children) {
@@ -49,18 +51,20 @@ public class Skeleton {
 				LOG.error("Bad parent name [{}].", name);
 				continue;
 			}
-			SkeletonBone node = (SkeletonBone)this.nodeMap.get(name);
+			SkeletonBone node = (SkeletonBone) this.nodeMap.get(name);
 			Double tx = bone.getThetaX();
 			Double ty = bone.getThetaY();
 			Double tz = bone.getThetaZ();
 
-			node.settX(tx.doubleValue());
+			node.setThetaX(tx.doubleValue());
 			if (ty != null) {
-				node.settY(ty.doubleValue());
+				node.setThetaY(ty.doubleValue());
 			}
+			else node.setThetaY(0);
 			if (tz != null) {
-				node.settZ(tz.doubleValue());
+				node.setThetaZ(tz.doubleValue());
 			}
+			else node.setThetaZ(0);
 		}
 	}
 
@@ -69,5 +73,11 @@ public class Skeleton {
 			return;
 		}
 		this.root.draw(g, null);
+	}
+	/**
+	 * @param rotateY the rotateY to set
+	 */
+	public void setRotateY(double rotateY) {
+		this.rotateY = rotateY;
 	}
 }

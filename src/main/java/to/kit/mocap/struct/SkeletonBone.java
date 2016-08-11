@@ -3,25 +3,30 @@ package to.kit.mocap.struct;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import to.kit.mocap.util.MathExt;
 
 public class SkeletonBone extends SkeletonNode {
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(SkeletonBone.class);
 
 	private int id;
-	private double[] direction;
-	private double tX;
-	private double tY;
-	private double tZ;
+	private double dirX;
+	private double dirY;
+	private double dirZ;
+	private double thetaX;
+	private double thetaY;
+	private double thetaZ;
 	private double length;
-	private double axisX;
-	private double axisY;
-	private double axisZ;
+	private String order;
 	/** Degrees of Freedom. */
 	private String[] dof;
-	private String limits;
+	private Limit limitX = new Limit();
+	private Limit limitY = new Limit();
+	private Limit limitZ = new Limit();
 	/**
 	 * @return the id
 	 */
@@ -35,55 +40,48 @@ public class SkeletonBone extends SkeletonNode {
 		this.id = value;
 	}
 	/**
-	 * @return the direction
-	 */
-	public double[] getDirection() {
-		return this.direction;
-	}
-	/**
 	 * @param values the direction to set
 	 */
 	public void setDirection(double[] values) {
-		this.direction = values;
-		this.tX = values[0];
-		this.tY = values[1];
-		this.tZ = values[2];
+		this.dirX = values[0];
+		this.dirY = values[1];
+		this.dirZ = values[2];
 	}
 	/**
 	 * @return the tX
 	 */
-	public double gettX() {
-		return this.tX;
+	public double getThetaX() {
+		return this.thetaX;
 	}
 	/**
 	 * @param tX the tX to set
 	 */
-	public void settX(double tX) {
-		this.tX = tX;
+	public void setThetaX(double tX) {
+		this.thetaX = tX;
 	}
 	/**
 	 * @return the tY
 	 */
-	public double gettY() {
-		return this.tY;
+	public double getThetaY() {
+		return this.thetaY;
 	}
 	/**
 	 * @param tY the tY to set
 	 */
-	public void settY(double tY) {
-		this.tY = tY;
+	public void setThetaY(double tY) {
+		this.thetaY = tY;
 	}
 	/**
 	 * @return the tZ
 	 */
-	public double gettZ() {
-		return this.tZ;
+	public double getThetaZ() {
+		return this.thetaZ;
 	}
 	/**
 	 * @param tZ the tZ to set
 	 */
-	public void settZ(double tZ) {
-		this.tZ = tZ;
+	public void setThetaZ(double tZ) {
+		this.thetaZ = tZ;
 	}
 	/**
 	 * @return the length
@@ -98,40 +96,24 @@ public class SkeletonBone extends SkeletonNode {
 		this.length = length;
 	}
 	/**
-	 * @return the axisX
+	 * @param values the values to set
 	 */
-	public double getAxisX() {
-		return this.axisX;
+	public void setAxis(double[] values) {
+		setAxisX(values[0]);
+		setAxisY(values[1]);
+		setAxisZ(values[2]);
 	}
 	/**
-	 * @param axisX the axisX to set
+	 * @return the order
 	 */
-	public void setAxisX(double axisX) {
-		this.axisX = axisX;
+	public String getOrder() {
+		return this.order;
 	}
 	/**
-	 * @return the axisY
+	 * @param order
 	 */
-	public double getAxisY() {
-		return this.axisY;
-	}
-	/**
-	 * @param axisY the axisY to set
-	 */
-	public void setAxisY(double axisY) {
-		this.axisY = axisY;
-	}
-	/**
-	 * @return the axisZ
-	 */
-	public double getAxisZ() {
-		return this.axisZ;
-	}
-	/**
-	 * @param axisZ the axisZ to set
-	 */
-	public void setAxisZ(double axisZ) {
-		this.axisZ = axisZ;
+	public void setOrder(String order) {
+		this.order = order;
 	}
 	/**
 	 * @return the dof
@@ -146,39 +128,112 @@ public class SkeletonBone extends SkeletonNode {
 		this.dof = dof;
 	}
 	/**
-	 * @return the limits
+	 * @return the limitX
 	 */
-	public String getLimits() {
-		return this.limits;
+	public Limit getLimitX() {
+		return this.limitX;
 	}
 	/**
-	 * @param limits the limits to set
+	 * @param limitX the limitX to set
 	 */
-	public void setLimits(String limits) {
-		this.limits = limits;
+	public void setLimitX(Limit limitX) {
+		this.limitX = limitX;
+	}
+	/**
+	 * @return the limitY
+	 */
+	public Limit getLimitY() {
+		return this.limitY;
+	}
+	/**
+	 * @param limitY the limitY to set
+	 */
+	public void setLimitY(Limit limitY) {
+		this.limitY = limitY;
+	}
+	/**
+	 * @return the limitZ
+	 */
+	public Limit getLimitZ() {
+		return this.limitZ;
+	}
+	/**
+	 * @param limitZ the limitZ to set
+	 */
+	public void setLimitZ(Limit limitZ) {
+		this.limitZ = limitZ;
 	}
 
-	static Color[] cols = { Color.BLUE, Color.RED, Color.MAGENTA, Color.GREEN, Color.CYAN, Color.YELLOW };
+	@Override
+	public String toString() {
+		double tx = this.limitX.trim(this.thetaX) * 180 / Math.PI;
+		double ty = this.limitY.trim(this.thetaY) * 180 / Math.PI;
+		double tz = this.limitZ.trim(this.thetaZ) * 180 / Math.PI;
+
+		return StringUtils.repeat(' ', getDepth()) + getName() + "[" + tx + "/" + this.limitX + ", " + ty + "/" + this.limitY + "]";
+	}
+
+	static Color[] cols = { Color.BLUE, Color.RED, Color.MAGENTA, Color.GREEN, Color.CYAN, Color.YELLOW, Color.WHITE };
 
 	@Override
-	public void draw(Graphics2D g, P3D pt) {
-		double r = this.length * 10;
-		double x = Math.cos(this.tY) * r;
-		double z = Math.sin(this.tY) * r;
-		double y = Math.sin(this.tZ) * x;
+	public void draw(Graphics2D g, SkeletonNode parent) {
+		int depth = this.getDepth();
+		double x = this.dirX * this.length;
+		double y = this.dirY * this.length;
+		double z = this.dirZ * this.length;
+		P2D yz = new P2D(y, z).rotate(parent.getAxisX() + getAxisX());
+		y = yz.x;
+		z = yz.y;
+		P2D zx = new P2D(z, x).rotate(parent.getAxisY() + getAxisY());
+		z = zx.x;
+		x = zx.y;
+		P2D xy = new P2D(x, y).rotate(parent.getAxisZ() + getAxisZ());
+		x = xy.x;
+		y = xy.y;
 
-		g.setColor(cols[this.id % cols.length]);
-		x = Math.cos(this.tZ) * x;
-		int x1 = (int) pt.x;
-		int y1 = (int) pt.y;
-		int x2 = (int) x;
-		int y2 = (int) y;
-		g.drawLine(x1, y1, x2, y2);
-		P3D nextPt = new P3D(pt.x + x, pt.y + y, pt.z + z);
-//LOG.info("[{}]{},{},{}", this.getName(), Double.valueOf(x), Double.valueOf(y), Double.valueOf(z));
+		yz = new P2D(y, z).rotate(this.limitX.trim(this.thetaX));
+		y = yz.x;
+		z = yz.y;
+		zx = new P2D(z, x).rotate(this.limitY.trim(this.thetaY));
+		z = zx.x;
+		x = zx.y;
+		xy = new P2D(x, y).rotate(this.limitZ.trim(this.thetaZ));
+		x = xy.x;
+		y = xy.y;
 
+
+		double rx = MathExt.trim(0*Math.PI / 8);
+		double ry = MathExt.trim(getSkeleton().rotateY);
+		double rz = MathExt.trim(0*Math.PI / 8);
+		yz = new P2D(y, z).rotate(rx);
+		y = yz.x;
+		z = yz.y;
+		zx = new P2D(z, x).rotate(ry);
+		z = zx.x;
+		x = zx.y;
+		xy = new P2D(x, y).rotate(rz);
+		x = xy.x;
+		y = xy.y;
+
+		P3D prevPt = parent.getPoint();
+		P3D nextPt = prevPt.add(x, -y, z);
+		double s1 = 1000;//Math.sqrt(pt.z) / 10;
+		double s2 = 1000;//Math.sqrt(nextPt.z) / 10;
+		int prevX = (int) (prevPt.x * s1);
+		int prevY = (int) (prevPt.y * s1);
+		int x2 = (int) (nextPt.x * s2);
+		int y2 = (int) (nextPt.y * s2);
+
+//		LOG.debug("{}", toString());
+//		g.setColor(Color.LIGHT_GRAY);
+		g.drawString(this.getName(), x2, y2);
+		g.setColor(cols[depth % cols.length]);
+		g.drawRoundRect(x2, y2, 4, 4, 3, 3);
+		g.drawLine(prevX, prevY, x2, y2);
+
+		setPoint(nextPt);
 		for (SkeletonNode node : getJoint()) {
-			node.draw(g, nextPt);
+			node.draw(g, this);
 		}
 	}
 }

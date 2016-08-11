@@ -1,5 +1,6 @@
 package to.kit.mocap.struct;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 
 public class SkeletonRoot extends SkeletonNode {
@@ -10,17 +11,6 @@ public class SkeletonRoot extends SkeletonNode {
 
 	public SkeletonRoot(String name) {
 		setName(name);
-	}
-
-	public P3D getPoint() {
-		P3D p;
-
-		if (this.position != null && 3 <= this.position.length) {
-			p = new P3D(this.position[0], this.position[1], this.position[2]);
-		} else {
-			p = new P3D(0, 0, 0);
-		}
-		return p;
 	}
 
 	/**
@@ -54,10 +44,18 @@ public class SkeletonRoot extends SkeletonNode {
 		return this.position;
 	}
 	/**
-	 * @param position the position to set
+	 * @param values the position to set
 	 */
-	public void setPosition(double[] position) {
-		this.position = position;
+	public void setPosition(double[] values) {
+		P3D p;
+
+		if (this.position != null && 3 <= this.position.length) {
+			p = new P3D(this.position[0], this.position[1], this.position[2]);
+		} else {
+			p = new P3D(0, 0, 0);
+		}
+		setPoint(p);
+		this.position = values;
 	}
 	/**
 	 * @return the orientation
@@ -73,11 +71,13 @@ public class SkeletonRoot extends SkeletonNode {
 	}
 
 	@Override
-	public void draw(Graphics2D g, P3D pt) {
-		P3D nextPt = getPoint();
+	public void draw(Graphics2D g, SkeletonNode parent) {
+		P3D pt = this.getPoint();
 
+		g.setColor(Color.BLACK);
+		g.drawString(this.getName(), (int) pt.x, (int) pt.y);
 		for (SkeletonNode node : getJoint()) {
-			node.draw(g, nextPt);
+			node.draw(g, this);
 		}
 	}
 }

@@ -8,9 +8,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import to.kit.mocap.util.MathExt;
 
 public class SkeletonLoader {
 	/** Logger. */
@@ -20,15 +23,16 @@ public class SkeletonLoader {
 	private String segment;
 	private SkeletonRoot root;
 	private SkeletonBone bone;
+	private int cnt;
 
-	private void processPosition(SkeletonRoot root, String[] param) {
+	private void processPosition(String[] param) {
 		int ix = 0;
 		double[] position = new double[param.length];
 
 		for (String val : param) {
 			position[ix++] = NumberUtils.toDouble(val);
 		}
-		root.setPosition(position);
+		this.root.setPosition(position);
 	}
 
 	private void processRoot(Skeleton skeleton, String[] param) {
@@ -41,13 +45,13 @@ public class SkeletonLoader {
 		} else if ("order".equals(this.segment)) {
 			this.root.setOrder(param[0]);
 		} else if ("position".equals(this.segment)) {
-			processPosition(this.root, param);
+			processPosition(param);
 		} else if ("orientation".equals(this.segment)) {
 			this.root.setOrientation(param[0]);
 		}
 	}
 
-	private void processDirection(SkeletonBone bone, String[] param) {
+	private void processDirection(String[] param) {
 		int ix = 0;
 		double[] direction = new double[param.length];
 
@@ -55,35 +59,43 @@ public class SkeletonLoader {
 			double deg = NumberUtils.toDouble(val);
 
 			direction[ix++] = deg * Math.PI / 180;
-//			direction[ix++] = deg;
 		}
-		bone.setDirection(direction);
+		this.bone.setDirection(direction);
 	}
 
-	private void processBoneAxis(SkeletonBone bone, String[] param) {
+	private void processBoneAxis(String[] param) {
 		double[] values = new double[3];
 		List<String> order = new ArrayList<>();
 
 		for (int ix = 0; ix < param.length; ix++) {
 			if (ix < 3) {
-				values[ix] = NumberUtils.toDouble(param[ix]);
+				double deg = NumberUtils.toDouble(param[ix]);
+
+				values[ix] = deg * Math.PI / 180;
 				continue;
 			}
 			for (char c : param[ix].toCharArray()) {
 				order.add(String.valueOf(c).toUpperCase());
 			}
 		}
-		int ix = 0;
-		for (String c : order) {
-			double value = values[ix];
-			if ("X".equals(c)) {
-				bone.setAxisX(value);
-			} else if ("Y".equals(c)) {
-				bone.setAxisY(value);
-			} else if ("Z".equals(c)) {
-				bone.setAxisZ(value);
-			}
-			ix++;
+		this.bone.setAxis(values);
+		this.bone.setOrder(StringUtils.join(order, StringUtils.EMPTY));
+	}
+
+	private void processLimit(String[] param) {
+		Limit limit = new Limit();
+		double min = NumberUtils.toDouble(param[0]);
+		double max = NumberUtils.toDouble(param[1]);
+		String pos = this.bone.getDof()[this.cnt];
+
+		limit.setMin(min * Math.PI / 180);
+		limit.setMax(max * Math.PI / 180);
+		if ("rx".equals(pos)) {
+			this.bone.setLimitX(limit);
+		} else if ("ry".equals(pos)) {
+			this.bone.setLimitY(limit);
+		} else if ("rz".equals(pos)) {
+			this.bone.setLimitZ(limit);
 		}
 	}
 
@@ -92,6 +104,7 @@ public class SkeletonLoader {
 			this.bone = new SkeletonBone();
 		} else if ("end".equals(this.segment)) {
 			skeleton.add(this.bone);
+			this.bone = null;
 		}
 		if (this.bone == null) {
 			return;
@@ -102,19 +115,23 @@ public class SkeletonLoader {
 		} else if ("name".equals(this.segment)) {
 			this.bone.setName(param[0]);
 		} else if ("direction".equals(this.segment)) {
-			processDirection(this.bone, param);
+			processDirection(param);
 		} else if ("length".equals(this.segment)) {
-			double length = NumberUtils.toDouble(param[0]);
-			this.bone.setLength(length);
+			this.bone.setLength(NumberUtils.toDouble(param[0]));
 		} else if ("axis".equals(this.segment)) {
-			processBoneAxis(this.bone, param);
+			processBoneAxis(param);
 		} else if ("dof".equals(this.segment)) {
 			this.bone.setDof(param);
 		} else if ("limits".equals(this.segment)) {
-			this.bone.setLimits(param[0]);
+			processLimit(param);
 		}
 	}
 
+	/**
+	 * Load ASF file.
+	 * @param file ASF file
+	 * @return Skeleton
+	 */
 	public Skeleton load(File file) {
 		Skeleton skeleton = new Skeleton();
 
@@ -133,12 +150,13 @@ public class SkeletonLoader {
 					this.section = line.substring(1);
 					continue;
 				}
-				String[] elements = line.split("[\\s()]");
+				String[] elements = line.split("[\\s()]+");
 				String seg = elements[0];
 				String[] param = Arrays.copyOfRange(elements, 1, elements.length);
 
 				if (seg.matches("[a-z]+")) {
 					this.segment = seg;
+					this.cnt = 0;
 				}
 				if ("root".equals(this.section)) {
 					processRoot(skeleton, param);
@@ -149,7 +167,7 @@ public class SkeletonLoader {
 						skeleton.addHierarchy(seg, param);
 					}
 				}
-//				System.out.println(line);
+				this.cnt++;
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
