@@ -7,6 +7,7 @@ import java.util.List;
 public abstract class SkeletonNode {
 	private String name;
 	private int depth;
+	private SkeletonNode parent;
 	private List<SkeletonNode> joint = new ArrayList<>();
 	private double axisX;
 	private double axisY;
@@ -22,6 +23,7 @@ public abstract class SkeletonNode {
 
 	public void add(SkeletonNode node) {
 		node.depth = this.depth + 1;
+		node.parent = this;
 		this.joint.add(node);
 	}
 
@@ -45,28 +47,24 @@ public abstract class SkeletonNode {
 	public int getDepth() {
 		return this.depth;
 	}
-
 	/**
-	 * @param depth the depth to set
+	 * @return the parent
 	 */
-	public void setDepth(int depth) {
-		this.depth = depth;
+	public SkeletonNode getParent() {
+		return this.parent;
 	}
-
 	/**
 	 * @return the axisX
 	 */
 	public double getAxisX() {
 		return this.axisX;
 	}
-
 	/**
 	 * @param value the axisX to set
 	 */
 	public void setAxisX(double value) {
 		this.axisX = value;
 	}
-
 	/**
 	 * @return the axisY
 	 */

@@ -181,13 +181,13 @@ public class SkeletonBone extends SkeletonNode {
 		double x = this.dirX * this.length;
 		double y = this.dirY * this.length;
 		double z = this.dirZ * this.length;
-		P2D yz = new P2D(y, z).rotate(parent.getAxisX() + getAxisX());
+		P2D yz = new P2D(y, z).rotate(getAxisX());
 		y = yz.x;
 		z = yz.y;
-		P2D zx = new P2D(z, x).rotate(parent.getAxisY() + getAxisY());
+		P2D zx = new P2D(z, x).rotate(getAxisY());
 		z = zx.x;
 		x = zx.y;
-		P2D xy = new P2D(x, y).rotate(parent.getAxisZ() + getAxisZ());
+		P2D xy = new P2D(x, y).rotate(getAxisZ());
 		x = xy.x;
 		y = xy.y;
 
@@ -201,10 +201,9 @@ public class SkeletonBone extends SkeletonNode {
 		x = xy.x;
 		y = xy.y;
 
-
-		double rx = MathExt.trim(0*Math.PI / 8);
+		double rx = MathExt.trim(0);
 		double ry = MathExt.trim(getSkeleton().rotateY);
-		double rz = MathExt.trim(0*Math.PI / 8);
+		double rz = MathExt.trim(0);
 		yz = new P2D(y, z).rotate(rx);
 		y = yz.x;
 		z = yz.y;
@@ -217,8 +216,8 @@ public class SkeletonBone extends SkeletonNode {
 
 		P3D prevPt = parent.getPoint();
 		P3D nextPt = prevPt.add(x, -y, z);
-		double s1 = 1000;//Math.sqrt(pt.z) / 10;
-		double s2 = 1000;//Math.sqrt(nextPt.z) / 10;
+		double s1 = 1000;
+		double s2 = 1000;
 		int prevX = (int) (prevPt.x * s1);
 		int prevY = (int) (prevPt.y * s1);
 		int x2 = (int) (nextPt.x * s2);
@@ -226,8 +225,8 @@ public class SkeletonBone extends SkeletonNode {
 
 //		LOG.debug("{}", toString());
 //		g.setColor(Color.LIGHT_GRAY);
-		g.drawString(this.getName(), x2, y2);
 		g.setColor(cols[depth % cols.length]);
+		g.drawString(this.getName(), x2, y2);
 		g.drawRoundRect(x2, y2, 4, 4, 3, 3);
 		g.drawLine(prevX, prevY, x2, y2);
 

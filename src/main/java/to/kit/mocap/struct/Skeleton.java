@@ -7,6 +7,8 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import to.kit.mocap.util.MathExt;
+
 public final class Skeleton {
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(Skeleton.class);
@@ -43,28 +45,56 @@ public final class Skeleton {
 		}
 	}
 
+	private void setRootPoint(MotionRoot motionRoot) {
+		P3D pt = motionRoot.getPoint();
+		double x = pt.x;
+		double y = pt.y;
+		double z = pt.x;
+		double[] theta = motionRoot.getTheta();
+		double rx = theta[0];
+		double ry = MathExt.trim(theta[1] + this.rotateY);
+		double rz = theta[2];
+		P2D yz = new P2D(y, z).rotate(rx);
+		y = yz.x;
+		z = yz.y;
+		P2D zx = new P2D(z, x).rotate(ry);
+		z = zx.x;
+		x = zx.y;
+		P2D xy = new P2D(x, y).rotate(rz);
+		x = xy.x;
+		y = xy.y;
+
+		this.root.setPoint(new P3D(x / 50, y / 50, z / 50));
+	}
+
 	public void shift(Motion motion) {
-		for (MotionBone bone : motion) {
-			String name = bone.getName();
+		for (MotionBone motionBone : motion) {
+			String name = motionBone.getName();
 
 			if (!this.nodeMap.containsKey(name)) {
 				LOG.error("Bad parent name [{}].", name);
 				continue;
 			}
-			SkeletonBone node = (SkeletonBone) this.nodeMap.get(name);
-			Double tx = bone.getThetaX();
-			Double ty = bone.getThetaY();
-			Double tz = bone.getThetaZ();
+			if (motionBone instanceof MotionRoot) {
+				setRootPoint((MotionRoot) motionBone);
+				continue;
+			}
+			SkeletonBone bone = (SkeletonBone) this.nodeMap.get(name);
+			double[] theta = motionBone.getTheta();
+			int ix = 0;
+			for (String deg : bone.getDof()) {
+				double val = theta[ix++];
 
-			node.setThetaX(tx.doubleValue());
-			if (ty != null) {
-				node.setThetaY(ty.doubleValue());
+				if ("rx".equals(deg)) {
+					bone.setThetaX(val);
+				} else if ("ry".equals(deg)) {
+					bone.setThetaY(val);
+				} else if ("rz".equals(deg)) {
+					bone.setThetaZ(val);
+				} else {
+					LOG.error("Unknown [{}].", deg);
+				}
 			}
-			else node.setThetaY(0);
-			if (tz != null) {
-				node.setThetaZ(tz.doubleValue());
-			}
-			else node.setThetaZ(0);
 		}
 	}
 

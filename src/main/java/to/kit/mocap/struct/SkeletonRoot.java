@@ -72,10 +72,6 @@ public class SkeletonRoot extends SkeletonNode {
 
 	@Override
 	public void draw(Graphics2D g, SkeletonNode parent) {
-		P3D pt = this.getPoint();
-
-		g.setColor(Color.BLACK);
-		g.drawString(this.getName(), (int) pt.x, (int) pt.y);
 		for (SkeletonNode node : getJoint()) {
 			node.draw(g, this);
 		}

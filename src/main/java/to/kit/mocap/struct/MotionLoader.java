@@ -12,9 +12,19 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MotionLoader {
+public final class MotionLoader {
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(MotionLoader.class);
+
+	private void loadDegrees(MotionBone bone, String[] param) {
+		double[] theta = bone.getTheta();
+
+		for (int ix = 0; ix < theta.length && ix < param.length; ix++) {
+			double deg = NumberUtils.toDouble(param[ix]);
+
+			theta[ix] = deg * Math.PI / 180;
+		}
+	}
 
 	public List<Motion> load(File file) {
 		List<Motion> list = new ArrayList<>();
@@ -48,24 +58,21 @@ public class MotionLoader {
 					continue;
 				}
 				if ("root".equals(id)) {
+					MotionRoot root = new MotionRoot(id);
+					double x = NumberUtils.toDouble(param[3]) / 10;
+					double y = NumberUtils.toDouble(param[4]) / 10;
+					double z = NumberUtils.toDouble(param[5]) / 10;
+					P3D pt = new P3D(x, y, z);
+
+					loadDegrees(root, param);
+					root.setPoint(pt);
+					motion.add(root);
 				} else {
 					MotionBone bone = new MotionBone(id);
-					double tx = NumberUtils.toDouble(param[0]);
 
-					bone.setThetaX(tx * Math.PI / 180);
-					if (1 < param.length) {
-						double ty = NumberUtils.toDouble(param[1]);
-
-						bone.setThetaY(ty * Math.PI / 180);
-					}
-					if (2 < param.length) {
-						double tz = NumberUtils.toDouble(param[2]);
-
-						bone.setThetaZ(tz * Math.PI / 180);
-					}
+					loadDegrees(bone, param);
 					motion.add(bone);
 				}
-//				System.out.println(line);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
