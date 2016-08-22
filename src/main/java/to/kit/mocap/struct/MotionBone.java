@@ -2,7 +2,7 @@ package to.kit.mocap.struct;
 
 public class MotionBone {
 	private final String name;
-	private final double[] theta = { 0.0, 0.0, 0.0 };
+	private final Double[] theta = { null, null, null };
 
 	public MotionBone(String name) {
 		this.name = name;
@@ -17,7 +17,7 @@ public class MotionBone {
 	/**
 	 * @return the theta
 	 */
-	public double[] getTheta() {
+	public Double[] getTheta() {
 		return this.theta;
 	}
 }

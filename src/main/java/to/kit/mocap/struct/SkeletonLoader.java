@@ -8,13 +8,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import to.kit.mocap.util.MathExt;
-
+/**
+ * SkeletonLoader.
+ * @author Hidetaka Sasai
+ */
 public class SkeletonLoader {
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(SkeletonLoader.class);
@@ -52,34 +53,59 @@ public class SkeletonLoader {
 	}
 
 	private void processDirection(String[] param) {
-		int ix = 0;
-		double[] direction = new double[param.length];
+		double[] dir = this.bone.getDir();
 
-		for (String val : param) {
+		for (int ix = 0; ix < dir.length && ix < param.length; ix++) {
+			String val = param[ix];
 			double deg = NumberUtils.toDouble(val);
 
-			direction[ix++] = deg * Math.PI / 180;
+			dir[ix] = deg;
 		}
-		this.bone.setDirection(direction);
 	}
 
 	private void processBoneAxis(String[] param) {
-		double[] values = new double[3];
+		Radian[] values = new Radian[3];
 		List<String> order = new ArrayList<>();
 
 		for (int ix = 0; ix < param.length; ix++) {
 			if (ix < 3) {
 				double deg = NumberUtils.toDouble(param[ix]);
+				Double rad = Double.valueOf(deg * Math.PI / 180);
 
-				values[ix] = deg * Math.PI / 180;
+				values[ix] = new Radian(rad);
 				continue;
 			}
 			for (char c : param[ix].toCharArray()) {
 				order.add(String.valueOf(c).toUpperCase());
 			}
 		}
-		this.bone.setAxis(values);
-		this.bone.setOrder(StringUtils.join(order, StringUtils.EMPTY));
+		for (int ix = 0; ix < values.length && ix < order.size(); ix++) {
+			String c = order.get(ix);
+			Radian val = values[ix];
+
+			if ("X".equals(c)) {
+				this.bone.setAxisX(val);
+			} else if ("Y".equals(c)) {
+				this.bone.setAxisY(val);
+			} else if ("Z".equals(c)) {
+				this.bone.setAxisZ(val);
+			}
+		}
+		double[] dir = this.bone.getDir();
+		double x = dir[0];
+		double y = dir[1];
+		double z = dir[2];
+		Radian ax = this.bone.getAxisX().rev();
+		Radian ay = this.bone.getAxisY().rev();
+		Radian az = this.bone.getAxisZ().rev();
+		P3D pt = new P3D(x, y, z).affine(az.rotateZ()).affine(ay.rotateY()).affine(ax.rotateX());
+		x = pt.x;
+		y = pt.y;
+		z = pt.z;
+		dir[0] = x;
+		dir[1] = y;
+		dir[2] = z;
+//System.out.println("(" + x + "," + y + "," + z + ")");
 	}
 
 	private void processLimit(String[] param) {
@@ -172,6 +198,7 @@ public class SkeletonLoader {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		skeleton.expedient();
 		return skeleton;
 	}
 }

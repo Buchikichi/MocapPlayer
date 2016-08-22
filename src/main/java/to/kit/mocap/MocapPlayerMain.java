@@ -5,6 +5,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -21,14 +23,18 @@ import to.kit.mocap.struct.Motion;
 import to.kit.mocap.struct.MotionLoader;
 import to.kit.mocap.struct.Skeleton;
 import to.kit.mocap.struct.SkeletonLoader;
+import javax.swing.SwingConstants;
 
 /**
  * Motion Capture Data Player.
  * @author Hidetaka Sasai
  */
 public class MocapPlayerMain extends JFrame {
+	private static final int FRAME_WIDTH = 1600;
+	private static final int FRAME_HEIGHT = 1200;
 	final MocapCanvas canvas = new MocapCanvas();
-	final JSlider rotationSlider = new JSlider();
+	final JSlider sliderH = new JSlider();
+	final JSlider sliderV = new JSlider();
 	final JSlider slider = new JSlider();
 	private JFileChooser chooser = new JFileChooser();
 
@@ -68,9 +74,26 @@ public class MocapPlayerMain extends JFrame {
 		}
 	}
 
+	protected void changeRotateH() {
+		double rad = this.sliderH.getValue() * Math.PI / 180;
+
+		this.canvas.setRotateH(rad);
+		this.canvas.repaint();
+	}
+
+	protected void changeRotateV() {
+		double rad = this.sliderV.getValue() * Math.PI / 180;
+
+		this.canvas.setRotateV(rad);
+		this.canvas.repaint();
+	}
+
+	/**
+	 * Create an instance.
+	 */
 	public MocapPlayerMain() {
 		setTitle("MocapPlayer");
-		setBounds(0, 0, 1024, 768);
+		setBounds(0, 0, FRAME_WIDTH, FRAME_HEIGHT);
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		getContentPane().setLayout(new BorderLayout(0, 0));
@@ -115,20 +138,52 @@ public class MocapPlayerMain extends JFrame {
 		getContentPane().add(panel, BorderLayout.PAGE_END);
 		panel.setLayout(new BorderLayout(0, 0));
 		panel.add(this.slider);
-		this.rotationSlider.setValue(0);
-		this.rotationSlider.setMaximum(360);
-		this.rotationSlider.addChangeListener(new ChangeListener() {
+		this.sliderH.setMinimum(-179);
+		this.sliderH.setValue(0);
+		this.sliderH.setMaximum(180);
+		this.sliderH.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				MocapCanvas cv = MocapPlayerMain.this.canvas;
-				double rotateY = MocapPlayerMain.this.rotationSlider.getValue() * Math.PI / 180;
-
-				cv.setRotateY(rotateY);
-				cv.repaint();
+				changeRotateH();
 			}
 		});
-		panel.add(this.rotationSlider, BorderLayout.NORTH);
+		panel.add(this.sliderH, BorderLayout.NORTH);
+		changeRotateH();
+		this.sliderV.setMinimum(-179);
+		this.sliderV.setValue(-179);
+		this.sliderV.setMaximum(180);
+		this.sliderV.setOrientation(SwingConstants.VERTICAL);
+		this.sliderV.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				changeRotateV();
+			}
+		});
+		getContentPane().add(this.sliderV, BorderLayout.WEST);
+		changeRotateV();
+		Timer timer = new Timer();
+
+		timer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				JSlider sld = MocapPlayerMain.this.slider;
+
+				if (!sld.isEnabled()) {
+					return;
+				}
+				int val = sld.getValue();
+				int max = sld.getMaximum();
+
+				if (max < ++val) {
+					val = sld.getMinimum();
+				}
+				sld.setValue(val);
+			}
+		}, 0, 100);
 	}
 
+	/**
+	 * Main.
+	 * @param args Arguments.
+	 */
 	public static void main(String[] args) {
 		MocapPlayerMain frame = new MocapPlayerMain();
 

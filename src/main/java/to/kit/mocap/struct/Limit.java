@@ -4,8 +4,8 @@ package to.kit.mocap.struct;
  * @author Hidetaka Sasai
  */
 public final class Limit {
-	private double min = -Math.PI;
-	private double max = Math.PI;
+	private double min = Double.MIN_VALUE;
+	private double max = Double.MAX_VALUE;
 
 	/**
 	 * @param source

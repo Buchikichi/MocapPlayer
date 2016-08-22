@@ -19,7 +19,8 @@ import to.kit.mocap.struct.Skeleton;
 public final class MocapCanvas extends Canvas {
 	private final List<Skeleton> skeletonList = new ArrayList<>();
 	private final List<Motion> motionList = new ArrayList<>();
-	private double rotateY;
+	private double rotateH;
+	private double rotateV;
 	private int current;
 
 	/**
@@ -36,10 +37,16 @@ public final class MocapCanvas extends Canvas {
 		this.motionList.addAll(list);
 	}
 	/**
-	 * @param rotateY the rotateY to set
+	 * @param value the rotateH to set
 	 */
-	public void setRotateY(double rotateY) {
-		this.rotateY = rotateY;
+	public void setRotateH(double value) {
+		this.rotateH = value;
+	}
+	/**
+	 * @param value the rotateV to set
+	 */
+	public void setRotateV(double value) {
+		this.rotateV = value;
 	}
 	/**
 	 * @param current the current to set
@@ -64,12 +71,16 @@ public final class MocapCanvas extends Canvas {
 
 		g2d.setBackground(Color.DARK_GRAY);
 		g2d.clearRect(0, 0, size.width, size.height);
+		g2d.setColor(Color.WHITE);
+		g2d.drawString(String.valueOf(this.current + 1), 0, 10);
+		g2d.drawString(String.valueOf(Math.floor(this.rotateH * 180 / Math.PI)), 0, 20);
 		g2d.translate(originX, originY);
 		if (!this.motionList.isEmpty()) {
 			motion = this.motionList.get(this.current);
 		}
 		for (Skeleton skeleton : this.skeletonList) {
-			skeleton.setRotateY(this.rotateY);
+			skeleton.setRotateH(this.rotateH);
+			skeleton.setRotateV(this.rotateV);
 			skeleton.draw(g2d);
 			if (motion != null) {
 				skeleton.shift(motion);

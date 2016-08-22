@@ -9,24 +9,25 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.math.NumberUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public final class MotionLoader {
-	/** Logger. */
-	private static final Logger LOG = LoggerFactory.getLogger(MotionLoader.class);
-
 	private void loadDegrees(MotionBone bone, String[] param) {
-		double[] theta = bone.getTheta();
+		Double[] theta = bone.getTheta();
 
-		for (int ix = 0; ix < theta.length && ix < param.length; ix++) {
+		for (int ix = 0; ix < 3 && ix < param.length; ix++) {
 			double deg = NumberUtils.toDouble(param[ix]);
+			double rad = deg * Math.PI / 180;
 
-			theta[ix] = deg * Math.PI / 180;
+			theta[ix] = Double.valueOf(rad);
 		}
 	}
 
-	public List<Motion> load(File file) {
+	/**
+	 * Load a motion file.
+	 * @param file AMC
+	 * @return motion list
+	 */
+	public List<Motion> load(final File file) {
 		List<Motion> list = new ArrayList<>();
 		Motion motion = null;
 
@@ -59,9 +60,9 @@ public final class MotionLoader {
 				}
 				if ("root".equals(id)) {
 					MotionRoot root = new MotionRoot(id);
-					double x = NumberUtils.toDouble(param[3]) / 10;
-					double y = NumberUtils.toDouble(param[4]) / 10;
-					double z = NumberUtils.toDouble(param[5]) / 10;
+					double x = NumberUtils.toDouble(param[3]);
+					double y = NumberUtils.toDouble(param[4]);
+					double z = NumberUtils.toDouble(param[5]);
 					P3D pt = new P3D(x, y, z);
 
 					loadDegrees(root, param);
