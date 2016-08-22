@@ -60,12 +60,13 @@ public final class MotionLoader {
 				}
 				if ("root".equals(id)) {
 					MotionRoot root = new MotionRoot(id);
-					double x = NumberUtils.toDouble(param[3]);
-					double y = NumberUtils.toDouble(param[4]);
-					double z = NumberUtils.toDouble(param[5]);
+					double x = NumberUtils.toDouble(param[0]);
+					double y = NumberUtils.toDouble(param[1]);
+					double z = NumberUtils.toDouble(param[2]);
+					String[] degrees = Arrays.copyOfRange(param, 3, param.length);
 					P3D pt = new P3D(x, y, z);
 
-					loadDegrees(root, param);
+					loadDegrees(root, degrees);
 					root.setPoint(pt);
 					motion.add(root);
 				} else {

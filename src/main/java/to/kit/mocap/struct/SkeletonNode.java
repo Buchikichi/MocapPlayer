@@ -25,7 +25,7 @@ public abstract class SkeletonNode {
 		return this.joint;
 	}
 
-	public abstract void draw(Graphics2D g, SkeletonNode parent); 
+	public abstract void draw(Graphics2D g); 
 
 	public void add(SkeletonNode node) {
 		node.depth = this.depth + 1;

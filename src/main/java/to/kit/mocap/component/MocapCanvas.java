@@ -66,7 +66,7 @@ public final class MocapCanvas extends Canvas {
 		BufferedImage img = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_BGR);
 		Graphics2D g2d = (Graphics2D) img.getGraphics();
 		int originX = size.width / 2;
-		int originY = size.height / 2;
+		int originY = size.height / 2 - size.height / 8;
 		Motion motion = null;
 
 		g2d.setBackground(Color.DARK_GRAY);

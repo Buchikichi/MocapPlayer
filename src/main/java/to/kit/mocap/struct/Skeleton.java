@@ -64,30 +64,12 @@ public final class Skeleton {
 
 	private void setRootPoint(MotionRoot motionRoot) {
 		P3D pt = motionRoot.getPoint();
-		double x = pt.x;
-		double y = pt.y;
-		double z = pt.x;
 		Double[] theta = motionRoot.getTheta();
-		double rx = theta[0].doubleValue();
-		double ry = MathExt.trim(theta[1].doubleValue() + this.rotateH);
-		double rz = theta[2].doubleValue();
-		P2D yz = new P2D(y, z).rotate(rx);
-		y = yz.x;
-		z = yz.y;
-		P2D zx = new P2D(z, x).rotate(ry);
-		z = zx.x;
-		x = zx.y;
-		P2D xy = new P2D(x, y).rotate(rz);
-		x = xy.x;
-		y = xy.y;
 
-//		this.root.setPoint(new P3D(pt.x, pt.y, pt.z));
-//		this.root.setThetaX(pt.x * Math.PI / 180);
-//		this.root.setThetaY(pt.y * Math.PI / 180);
-//		this.root.setThetaZ(pt.z * Math.PI / 180);
-//		this.root.setThetaX(theta[0]);
-//		this.root.setThetaY(theta[1]);
-//		this.root.setThetaZ(theta[2]);
+		this.root.setPoint(pt);
+		this.root.setThetaX(new Radian(theta[0]));
+		this.root.setThetaY(new Radian(theta[1]));
+		this.root.setThetaZ(new Radian(theta[2]));
 	}
 
 	public void shift(Motion motion) {
@@ -130,9 +112,9 @@ public final class Skeleton {
 //			thetaX *= -1;
 //			thetaY *= -1;
 //			thetaZ *= -1;
-//			thetaX += Math.PI;
-//			thetaY -= Math.PI;
-//			thetaZ -= Math.PI;
+//			thetaX = new Radian(thetaX.getRadian() + 160 * Math.PI / 180);
+//			thetaY = new Radian(32 * Math.PI / 180);
+//			thetaZ = new Radian(-161 * Math.PI / 180);
 			node.setThetaX(thetaX);
 			node.setThetaY(thetaY);
 			node.setThetaZ(thetaZ);
@@ -143,7 +125,7 @@ public final class Skeleton {
 		if (this.root == null) {
 			return;
 		}
-		this.root.draw(g, null);
+		this.root.draw(g);
 	}
 	/**
 	 * @return the pos

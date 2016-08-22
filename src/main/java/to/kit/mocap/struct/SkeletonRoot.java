@@ -1,14 +1,21 @@
 package to.kit.mocap.struct;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 
-public class SkeletonRoot extends SkeletonNode {
+/**
+ * SkeletonRoot.
+ * @author Hidetaka Sasai
+ */
+public final class SkeletonRoot extends SkeletonNode {
 	private String order;
 	private String axis;
 	private double[] position;
 	private String orientation;
 
+	/**
+	 * Create an instance.
+	 * @param name the Name
+	 */
 	public SkeletonRoot(String name) {
 		setName(name);
 	}
@@ -71,9 +78,9 @@ public class SkeletonRoot extends SkeletonNode {
 	}
 
 	@Override
-	public void draw(Graphics2D g, SkeletonNode parent) {
+	public void draw(Graphics2D g) {
 		for (SkeletonNode node : getJoint()) {
-			node.draw(g, this);
+			node.draw(g);
 		}
 	}
 }

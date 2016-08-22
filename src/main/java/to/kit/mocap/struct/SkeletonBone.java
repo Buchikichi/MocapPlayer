@@ -5,6 +5,7 @@ import java.awt.Graphics2D;
 
 import javax.vecmath.Quat4d;
 
+import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,6 +114,9 @@ public final class SkeletonBone extends SkeletonNode {
 		RealMatrix matX = parent.getAccumX();//.multiply(MatrixUtils.createRealMatrix(ax.rotateX()));
 		RealMatrix matY = parent.getAccumY();//.multiply(MatrixUtils.createRealMatrix(ay.rotateY()));
 		RealMatrix matZ = parent.getAccumZ();//.multiply(MatrixUtils.createRealMatrix(az.rotateZ()));
+//matX = MatrixUtils.createRealMatrix(ax.rotateX()).multiply(matX);
+//matY = MatrixUtils.createRealMatrix(ay.rotateY()).multiply(matY);
+//matZ = MatrixUtils.createRealMatrix(az.rotateZ()).multiply(matZ);
 		double[][] parX = matX.getData();
 		double[][] parY = matY.getData();
 		double[][] parZ = matZ.getData();
@@ -130,7 +134,7 @@ public final class SkeletonBone extends SkeletonNode {
 		P3D ny = py.rotate(getSkeleton().rotateV, getSkeleton().rotateH, 0);
 		P3D nz = pz.rotate(getSkeleton().rotateV, getSkeleton().rotateH, 0);
 
-		g.setColor(Color.RED);
+/*		g.setColor(Color.RED);
 		g.drawLine(prevX, prevY, (int) (prevX + nx.x), (int) (prevY + nx.y));
 		g.setColor(Color.GREEN);
 		g.drawLine(prevX, prevY, (int) (prevX + ny.x), (int) (prevY + ny.y));
@@ -143,15 +147,17 @@ public final class SkeletonBone extends SkeletonNode {
 		g.setColor(Color.BLACK);
 		if (name.startsWith("l")) {
 			axis += name;
-			g.drawString(axis, prevX + (name.startsWith("r") ? -150 : 0), prevY + 0 * (depth - 1));
+			g.drawString(axis, prevX + 10 * (depth - 1), prevY + 0 * (depth - 1));
 		}
+		//*/
 		return new P3D(px.x, py.y, pz.z);
 	}
 
 	@Override
-	public void draw(Graphics2D g, SkeletonNode parent) {
-		double s1 = 27;
-		double s2 = 27;
+	public void draw(Graphics2D g) {
+		double s1 = 10;
+		double s2 = 10;
+		SkeletonNode parent = getParent();
 		P3D prevPt = parent.getPoint();
 		int prevX = (int) (prevPt.x * s1);
 		int prevY = (int) (prevPt.y * s1);
@@ -168,9 +174,9 @@ public final class SkeletonBone extends SkeletonNode {
 		Radian ax = getAxisX();
 		Radian ay = getAxisY();
 		Radian az = getAxisZ();
-		RealMatrix matX = parent.getAccumX();
-		RealMatrix matY = parent.getAccumY();
-		RealMatrix matZ = parent.getAccumZ();
+		RealMatrix matX = getAccumX();
+		RealMatrix matY = getAccumY();
+		RealMatrix matZ = getAccumZ();
 		double[][] parX = matX.getData();
 		double[][] parY = matY.getData();
 		double[][] parZ = matZ.getData();
@@ -178,10 +184,10 @@ public final class SkeletonBone extends SkeletonNode {
 		Radian ty = this.thetaY;
 		Radian tz = this.thetaZ;
 
-		P3D pm = new P3D(x, y, z).affine(tx.rotateX()).affine(ty.rotateY()).affine(tz.rotateZ());
-		x = pm.x;
-		y = pm.y;
-		z = pm.z;
+//		P3D pm = new P3D(x, y, z).affine(tx.rotateX()).affine(ty.rotateY()).affine(tz.rotateZ());
+//		x = pm.x;
+//		y = pm.y;
+//		z = pm.z;
 		P3D pt = new P3D(x, y, z).affine(parX).affine(parY).affine(parZ)
 				.affine(ax.rotateX()).affine(ay.rotateY()).affine(az.rotateZ());
 //		P3D pt = new P3D(x, y, z).affine(ax.rotateX()).affine(ay.rotateY()).affine(az.rotateZ());
@@ -235,22 +241,19 @@ public final class SkeletonBone extends SkeletonNode {
 		int x2 = (int) (nextPt.x * s2);
 		int y2 = (int) (nextPt.y * s2);
 
-//		LOG.debug("{}", toString());
-		String info = String.format("[%3.2f,%3.2f,%3.2f]", tx.toDegree(), ty.toDegree(), tz.toDegree());
-		
-		g.setColor(Color.GRAY);
-		if (name.startsWith("l")) {
-			g.drawString(info + name, prevX + (name.startsWith("r") ? -150 : 0), prevY + 0 * (depth - 1) + 10);
-		}
+//		String info = String.format("[%3.2f,%3.2f,%3.2f]", tx.toDegree(), ty.toDegree(), tz.toDegree());
+//		g.setColor(Color.GRAY);
+//		if (name.startsWith("l")) {
+//			g.drawString(info + name, prevX + 10 * (depth - 1), prevY + 10);
+//		}
 
 		g.setColor(Color.LIGHT_GRAY);
-//		g.drawString(this.getName(), x2, y2);
 		g.drawRoundRect(x2, y2, 3, 3, 3, 3);
 		g.drawLine(prevX, prevY, x2, y2);
 
 		setPoint(nextPt);
 		for (SkeletonNode node : getJoint()) {
-			node.draw(g, this);
+			node.draw(g);
 		}
 	}
 }
