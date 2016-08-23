@@ -91,34 +91,15 @@ public abstract class SkeletonNode {
 		return ma;
 	}
 
-	public RealMatrix getAccumX() {
-		double[][] result = this.thetaX.rotateX();
-		RealMatrix ma = MatrixUtils.createRealMatrix(result);
+	public RealMatrix getAccum() {
+		RealMatrix mx = MatrixUtils.createRealMatrix(this.thetaX.rotateX());
+		RealMatrix my = MatrixUtils.createRealMatrix(this.thetaY.rotateY());
+		RealMatrix mz = MatrixUtils.createRealMatrix(this.thetaZ.rotateZ());
+		RealMatrix ma = mz.multiply(my).multiply(mx);
 
 		if (this.parent != null) {
-			ma = this.parent.getAccumX().multiply(ma);
+			ma = this.parent.getAccum().multiply(ma);
 		}
-//		ma = ma.multiply(this.getAccumAxisX());
-		return ma;
-	}
-	public RealMatrix getAccumY() {
-		double[][] result = this.thetaY.rotateY();
-		RealMatrix ma = MatrixUtils.createRealMatrix(result);
-
-		if (this.parent != null) {
-			ma = this.parent.getAccumY().multiply(ma);
-		}
-//		ma = ma.multiply(this.getAccumAxisY());
-		return ma;
-	}
-	public RealMatrix getAccumZ() {
-		double[][] result = this.thetaZ.rotateZ();
-		RealMatrix ma = MatrixUtils.createRealMatrix(result);
-
-		if (this.parent != null) {
-			ma = this.parent.getAccumZ().multiply(ma);
-		}
-//		ma = ma.multiply(this.getAccumAxisZ());
 		return ma;
 	}
 	/**

@@ -108,28 +108,15 @@ public final class SkeletonBone extends SkeletonNode {
 		String name = getName();
 		int depth = this.getDepth();
 		double len = 20;
-		Radian ax = getAxisX();
-		Radian ay = getAxisY();
-		Radian az = getAxisZ();
-		RealMatrix matX = parent.getAccumX();//.multiply(MatrixUtils.createRealMatrix(ax.rotateX()));
-		RealMatrix matY = parent.getAccumY();//.multiply(MatrixUtils.createRealMatrix(ay.rotateY()));
-		RealMatrix matZ = parent.getAccumZ();//.multiply(MatrixUtils.createRealMatrix(az.rotateZ()));
-//matX = MatrixUtils.createRealMatrix(ax.rotateX()).multiply(matX);
-//matY = MatrixUtils.createRealMatrix(ay.rotateY()).multiply(matY);
-//matZ = MatrixUtils.createRealMatrix(az.rotateZ()).multiply(matZ);
-		double[][] parX = matX.getData();
-		double[][] parY = matY.getData();
-		double[][] parZ = matZ.getData();
+		RealMatrix ax = MatrixUtils.createRealMatrix(getAxisX().rotateX());
+		RealMatrix ay = MatrixUtils.createRealMatrix(getAxisY().rotateY());
+		RealMatrix az = MatrixUtils.createRealMatrix(getAxisZ().rotateZ());
+		RealMatrix mat = parent.getAccum().multiply(az).multiply(ay).multiply(ax);
+		double[][] par = mat.getData();
 
-		P3D px = new P3D(len, 0, 0).affine(parX).affine(parY).affine(parZ)
-				.affine(ax.rotateX()).affine(ay.rotateY()).affine(az.rotateZ())
-				;
-		P3D py = new P3D(0, len, 0).affine(parX).affine(parY).affine(parZ)
-				.affine(ax.rotateX()).affine(ay.rotateY()).affine(az.rotateZ())
-				;
-		P3D pz = new P3D(0, 0, len).affine(parX).affine(parY).affine(parZ)
-				.affine(ax.rotateX()).affine(ay.rotateY()).affine(az.rotateZ())
-				;
+		P3D px = new P3D(len, 0, 0).affine(par);
+		P3D py = new P3D(0, len, 0).affine(par);
+		P3D pz = new P3D(0, 0, len).affine(par);
 		P3D nx = px.rotate(getSkeleton().rotateV, getSkeleton().rotateH, 0);
 		P3D ny = py.rotate(getSkeleton().rotateV, getSkeleton().rotateH, 0);
 		P3D nz = pz.rotate(getSkeleton().rotateV, getSkeleton().rotateH, 0);
@@ -140,9 +127,9 @@ public final class SkeletonBone extends SkeletonNode {
 		g.drawLine(prevX, prevY, (int) (prevX + ny.x), (int) (prevY + ny.y));
 		g.setColor(Color.BLUE);
 		g.drawLine(prevX, prevY, (int) (prevX + nz.x), (int) (prevY + nz.y));
-		Double degX = ax.toDegree();
-		Double degY = ay.toDegree();
-		Double degZ = az.toDegree();
+		Double degX = getAxisX().toDegree();
+		Double degY = getAxisY().toDegree();
+		Double degZ = getAxisZ().toDegree();
 		String axis = String.format("(%3.2f,%3.2f,%3.2f)", degX, degY, degZ);
 		g.setColor(Color.BLACK);
 		if (name.startsWith("l")) {
@@ -168,28 +155,22 @@ public final class SkeletonBone extends SkeletonNode {
 		double x = this.dir[0] * this.length;
 		double y = this.dir[1] * this.length;
 		double z = this.dir[2] * this.length;
-//		double ax = 0*parent.getAxisX() + 1*getAxisX() + 0*getAccumAxisX();
-//		double ay = 0*parent.getAxisY() + 1*getAxisY() + 0*getAccumAxisY();
-//		double az = 0*parent.getAxisZ() + 1*getAxisZ() + 0*getAccumAxisZ();
-		Radian ax = getAxisX();
-		Radian ay = getAxisY();
-		Radian az = getAxisZ();
-		RealMatrix matX = getAccumX();
-		RealMatrix matY = getAccumY();
-		RealMatrix matZ = getAccumZ();
-		double[][] parX = matX.getData();
-		double[][] parY = matY.getData();
-		double[][] parZ = matZ.getData();
-		Radian tx = this.thetaX;
-		Radian ty = this.thetaY;
-		Radian tz = this.thetaZ;
+		RealMatrix ax = MatrixUtils.createRealMatrix(getAxisX().rotateX());
+		RealMatrix ay = MatrixUtils.createRealMatrix(getAxisY().rotateY());
+		RealMatrix az = MatrixUtils.createRealMatrix(getAxisZ().rotateZ());
+		ax = az.multiply(ay).multiply(ax);
+		RealMatrix tx = MatrixUtils.createRealMatrix(this.thetaX.rotateX());
+		RealMatrix ty = MatrixUtils.createRealMatrix(this.thetaY.rotateY());
+		RealMatrix tz = MatrixUtils.createRealMatrix(this.thetaZ.rotateZ());
+		tx = tz.multiply(ty).multiply(tx);
+		RealMatrix mat = parent.getAccum().multiply(ax).multiply(tx);
+		double[][] parX = mat.getData();
 
 //		P3D pm = new P3D(x, y, z).affine(tx.rotateX()).affine(ty.rotateY()).affine(tz.rotateZ());
 //		x = pm.x;
 //		y = pm.y;
 //		z = pm.z;
-		P3D pt = new P3D(x, y, z).affine(parX).affine(parY).affine(parZ)
-				.affine(ax.rotateX()).affine(ay.rotateY()).affine(az.rotateZ());
+		P3D pt = new P3D(x, y, z).affine(parX);
 //		P3D pt = new P3D(x, y, z).affine(ax.rotateX()).affine(ay.rotateY()).affine(az.rotateZ());
 		x = pt.x;
 		y = pt.y;
