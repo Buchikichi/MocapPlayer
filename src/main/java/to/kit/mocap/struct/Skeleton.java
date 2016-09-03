@@ -7,8 +7,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import to.kit.mocap.util.MathExt;
-
 public final class Skeleton {
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(Skeleton.class);
@@ -18,21 +16,6 @@ public final class Skeleton {
 	private Map<String, SkeletonNode> nodeMap = new HashMap<>();
 	double rotateH;
 	double rotateV;
-
-	/**
-	 * @deprecated 削除予定
-	 */
-	@Deprecated
-	public void expedient() {
-		String[] nameList = {"lhumerus", "rhumerus"};
-		for (String name : nameList) {
-			SkeletonNode node = this.nodeMap.get(name);
-//			double axisX = node.getAxisX();
-//
-//			axisX += Math.PI;
-//			node.setAxisX(axisX);
-		}
-	}
 
 	public void add(SkeletonNode node) {
 		String name = node.getName();
@@ -101,23 +84,6 @@ public final class Skeleton {
 					LOG.error("Unknown [{}].", deg);
 				}
 			}
-		}
-		String[] nameList = { /*"lhumerus", "rhumerus",*/"lradius" };
-		for (String name : nameList) {
-			SkeletonNode node = this.nodeMap.get(name);
-			Radian thetaX = node.getThetaX();
-			Radian thetaY = node.getThetaY();
-			Radian thetaZ = node.getThetaZ();
-
-//			thetaX *= -1;
-//			thetaY *= -1;
-//			thetaZ *= -1;
-//			thetaX = new Radian(thetaX.getRadian() + 160 * Math.PI / 180);
-//			thetaY = new Radian(32 * Math.PI / 180);
-//			thetaZ = new Radian(-161 * Math.PI / 180);
-			node.setThetaX(thetaX);
-			node.setThetaY(thetaY);
-			node.setThetaZ(thetaZ);
 		}
 	}
 

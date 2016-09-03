@@ -1,7 +1,11 @@
 package to.kit.mocap.struct;
 
+import org.apache.commons.math3.linear.MatrixUtils;
+import org.apache.commons.math3.linear.RealMatrix;
+
 public final class Radian {
-	private static final double[][] NO_EFFECT = { { 1, 0, 0, 0 }, { 0, 1, 0, 0 }, { 0, 0, 1, 0 }, { 0, 0, 0, 1 } };
+	private static final RealMatrix NO_EFFECT =
+			MatrixUtils.createRealMatrix(new double[][] { { 1, 0, 0, 0 }, { 0, 1, 0, 0 }, { 0, 0, 1, 0 }, { 0, 0, 0, 1 } });
 	private Double radian;
 
 	public Radian(Double rad) {
@@ -26,46 +30,46 @@ public final class Radian {
 		return this;
 	}
 
-	public double[][] rotateX() {
+	public RealMatrix rotateX() {
 		if (this.radian == null) {
 			return NO_EFFECT;
 		}
 		double t = this.radian.doubleValue();
 
-		return new double[][] {
+		return MatrixUtils.createRealMatrix(new double[][] {
 			{ 1, 0, 0, 0 },
 			{ 0, Math.cos(t), -Math.sin(t), 0 },
 			{ 0, Math.sin(t), Math.cos(t), 0 },
 			{ 0, 0, 0, 1 },
-		};
+		});
 	}
 
-	public double[][] rotateY() {
+	public RealMatrix rotateY() {
 		if (this.radian == null) {
 			return NO_EFFECT;
 		}
 		double t = this.radian.doubleValue();
 
-		return new double[][] {
+		return MatrixUtils.createRealMatrix(new double[][] {
 			{ Math.cos(t), 0, Math.sin(t), 0 },
 			{ 0, 1, 0, 0 },
 			{ -Math.sin(t), 0, Math.cos(t), 0 },
 			{ 0, 0, 0, 1 },
-		};
+		});
 	}
 
-	public double[][] rotateZ() {
+	public RealMatrix rotateZ() {
 		if (this.radian == null) {
 			return NO_EFFECT;
 		}
 		double t = this.radian.doubleValue();
 
-		return new double[][] {
+		return MatrixUtils.createRealMatrix(new double[][] {
 			{ Math.cos(t), -Math.sin(t), 0, 0 },
 			{ Math.sin(t), Math.cos(t), 0, 0 },
 			{ 0, 0, 1, 0 },
 			{ 0, 0, 0, 1 },
-		};
+		});
 	}
 
 	/**

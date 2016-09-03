@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.commons.math3.linear.RealMatrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +17,7 @@ import org.slf4j.LoggerFactory;
  * SkeletonLoader.
  * @author Hidetaka Sasai
  */
-public class SkeletonLoader {
+public final class SkeletonLoader {
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(SkeletonLoader.class);
 
@@ -25,6 +26,28 @@ public class SkeletonLoader {
 	private SkeletonRoot root;
 	private SkeletonBone bone;
 	private int cnt;
+
+	private void adjustDirection(SkeletonNode parent) {
+		if (parent instanceof SkeletonBone) {
+			SkeletonBone aBone = (SkeletonBone) parent;
+			RealMatrix mx = aBone.getAccumAxisRev();
+			double[] dir = aBone.getDir();
+			double x = dir[0];
+			double y = dir[1];
+			double z = dir[2];
+			P3D pt = new P3D(x, y, z).affine(mx.getData());
+
+			x = pt.x;
+			y = pt.y;
+			z = pt.z;
+			dir[0] = x;
+			dir[1] = y;
+			dir[2] = z;
+		}
+		for (SkeletonNode child : parent.getJoint()) {
+			adjustDirection(child);
+		}
+	}
 
 	private void processPosition(String[] param) {
 		int ix = 0;
@@ -91,21 +114,6 @@ public class SkeletonLoader {
 				this.bone.setAxisZ(val);
 			}
 		}
-		double[] dir = this.bone.getDir();
-		double x = dir[0];
-		double y = dir[1];
-		double z = dir[2];
-		Radian ax = this.bone.getAxisX().rev();
-		Radian ay = this.bone.getAxisY().rev();
-		Radian az = this.bone.getAxisZ().rev();
-		P3D pt = new P3D(x, y, z).affine(az.rotateZ()).affine(ay.rotateY()).affine(ax.rotateX());
-		x = pt.x;
-		y = pt.y;
-		z = pt.z;
-		dir[0] = x;
-		dir[1] = y;
-		dir[2] = z;
-//System.out.println("(" + x + "," + y + "," + z + ")");
 	}
 
 	private void processLimit(String[] param) {
@@ -198,7 +206,7 @@ public class SkeletonLoader {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		skeleton.expedient();
+		adjustDirection(this.root);
 		return skeleton;
 	}
 }
