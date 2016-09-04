@@ -73,7 +73,8 @@ public final class MocapCanvas extends Canvas {
 		g2d.clearRect(0, 0, size.width, size.height);
 		g2d.setColor(Color.WHITE);
 		g2d.drawString(String.valueOf(this.current + 1), 0, 10);
-		g2d.drawString(String.valueOf(Math.floor(this.rotateH * 180 / Math.PI)), 0, 20);
+		g2d.drawString("V:" + String.valueOf(Math.floor(this.rotateV * 180 / Math.PI)), 0, 20);
+		g2d.drawString("H:" + String.valueOf(Math.floor(this.rotateH * 180 / Math.PI)), 0, 30);
 		g2d.translate(originX, originY);
 		if (!this.motionList.isEmpty()) {
 			motion = this.motionList.get(this.current);

@@ -11,7 +11,6 @@ public final class Skeleton {
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(Skeleton.class);
 
-	private P3D pos = new P3D(0, 0, 0);
 	private SkeletonRoot root;
 	private Map<String, SkeletonNode> nodeMap = new HashMap<>();
 	double rotateH;
@@ -46,10 +45,9 @@ public final class Skeleton {
 	}
 
 	private void setRootPoint(MotionRoot motionRoot) {
-		P3D pt = motionRoot.getPoint();
 		Double[] theta = motionRoot.getTheta();
 
-		this.root.setPoint(pt);
+		this.root.setTransform(motionRoot.getPoint());
 		this.root.setThetaX(new Radian(theta[0]));
 		this.root.setThetaY(new Radian(theta[1]));
 		this.root.setThetaZ(new Radian(theta[2]));
@@ -92,18 +90,6 @@ public final class Skeleton {
 			return;
 		}
 		this.root.draw(g);
-	}
-	/**
-	 * @return the pos
-	 */
-	public P3D getPos() {
-		return this.pos;
-	}
-	/**
-	 * @param pos the pos to set
-	 */
-	public void setPos(P3D pos) {
-		this.pos = pos;
 	}
 	/**
 	 * @return the root

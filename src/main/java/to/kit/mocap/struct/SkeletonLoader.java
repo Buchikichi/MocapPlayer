@@ -10,17 +10,12 @@ import java.util.List;
 
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.math3.linear.RealMatrix;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * SkeletonLoader.
  * @author Hidetaka Sasai
  */
 public final class SkeletonLoader {
-	/** Logger. */
-	private static final Logger LOG = LoggerFactory.getLogger(SkeletonLoader.class);
-
 	private String section;
 	private String segment;
 	private SkeletonRoot root;
@@ -35,7 +30,7 @@ public final class SkeletonLoader {
 			double x = dir[0];
 			double y = dir[1];
 			double z = dir[2];
-			P3D pt = new P3D(x, y, z).affine(mx.getData());
+			P3D pt = new P3D(x, y, z).affine(mx);
 
 			x = pt.x;
 			y = pt.y;

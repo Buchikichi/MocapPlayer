@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 
 import org.apache.commons.math3.complex.Quaternion;
+import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,25 +43,6 @@ public final class SkeletonBone extends SkeletonNode {
 		double r_axis_len = mag(axis);
 
 		return Math.atan2(r_axis_len, dot_prod);
-	}
-
-	@Override
-	protected RealMatrix getAccum() {
-		RealMatrix ax = getAxisMatrix();
-		RealMatrix tx = getThetaMatrix();
-		RealMatrix ma = ax.multiply(tx);
-		SkeletonNode parent = getParent();
-		double[] a = { 0.0, 0.0, 1.0 };
-		double cx = a[1] * this.dir[2] - a[2] * this.dir[1];
-		double cy = a[2] * this.dir[0] - a[0] * this.dir[2];
-		double cz = a[0] * this.dir[1] - a[1] * this.dir[0];
-		double[] axis = { cx, cy, cz };
-		double theta = getAngle(a, this.dir, axis);
-
-		if (parent instanceof SkeletonBone) {
-			ma = parent.getAccum().multiply(ma);
-		}
-		return ma;
 	}
 
 	/**
@@ -205,13 +187,9 @@ public final class SkeletonBone extends SkeletonNode {
 		SkeletonNode parent = getParent();
 		String name = getName();
 		int depth = this.getDepth();
-		double len = 20;
-		RealMatrix ax = getAxisMatrix();
-		RealMatrix mat = parent.getAccum().multiply(ax);
+		double len = 10;
+		RealMatrix mat = parent.getAccum().multiply(getAxisMatrix()).multiply(getThetaMatrix());
 		double[][] par = mat.getData();
-		double x = this.dir[0] * len;
-		double y = this.dir[1] * len;
-		double z = this.dir[2] * len;
 		P3D px = new P3D(len, 0, 0).affine(par);
 		P3D py = new P3D(0, len, 0).affine(par);
 		P3D pz = new P3D(0, 0, len).affine(par);
@@ -239,6 +217,36 @@ public final class SkeletonBone extends SkeletonNode {
 	}
 
 	@Override
+	protected RealMatrix getPositionMatrix() {
+		return MatrixUtils.createRealMatrix(new double[][] {
+			{ 1, 0, 0, -this.dir[0] * this.length },
+			{ 0, 1, 0, -this.dir[1] * this.length },
+			{ 0, 0, 1, -this.dir[2] * this.length },
+			{ 0, 0, 0, 1 },
+		});
+	}
+
+	@Override
+	protected RealMatrix getAccum() {
+		RealMatrix pm = getPositionMatrix();
+		RealMatrix am = getAxisMatrix();
+
+		RealMatrix tx = this.thetaX.rotateX();
+		RealMatrix ty = this.thetaY.rotateY();
+		RealMatrix tz = this.thetaZ.rotateZ();
+		RealMatrix tm = tx.multiply(ty).multiply(tz);
+
+		RealMatrix mat = am.multiply(tm).multiply(pm);
+
+		SkeletonNode parent = getParent();
+
+		if (parent != null) {
+			return parent.getAccum().multiply(mat);
+		}
+		return mat;
+	}
+
+	@Override
 	public void draw(Graphics2D g) {
 		double s1 = 15;
 		double s2 = 15;
@@ -248,67 +256,26 @@ public final class SkeletonBone extends SkeletonNode {
 		int prevY = (int) (prevPt.y * s1);
 		String name = getName();
 		int depth = this.getDepth();
-		P3D axi = getAxis(g, prevX, prevY);
+//		P3D axi = getAxis(g, prevX, prevY);
 
-		RealMatrix ax = getAxisMatrix();
-		RealMatrix tx = getThetaMatrix();
-		RealMatrix mat = parent.getAccum().multiply(ax).multiply(tx);
-		double[][] parX = mat.getData();
-		double x = this.dir[0] * this.length;
-		double y = this.dir[1] * this.length;
-		double z = this.dir[2] * this.length;
+		RealMatrix pa = parent.getAccum();
+		RealMatrix pm = getPositionMatrix();
+		RealMatrix am = getAxisMatrix();
+		RealMatrix tm = getThetaMatrix();
+		RealMatrix mat = pa.multiply(am).multiply(tm).multiply(pm);
 
-		P3D pt = getNextPoint().affine(parX);
-		x = pt.x;
-		y = pt.y;
-		z = pt.z;
+//		P3D pt = getNextPoint().affine(getAccum());
+//		P3D pt = P3D.ORIGIN.affine(getDirMatrix()).affine(ax.multiply(tx)).affine(px);
+		P3D pt = P3D.ORIGIN.affine(getAccum());
+//		P3D pt = P3D.ORIGIN.affine(mat);
 
-/*		if (parent instanceof SkeletonBone) {
-			SkeletonBone pb = (SkeletonBone) parent;
-			pb = this;
-			double[] pdir = { axi.x, axi.y, axi.z };
-			double[] rax = new double[] { -pdir[1], pdir[0], 0 };
-			double dot_prod = pdir[2];
-			double r_axis_len = Math.sqrt(rax[0] * rax[0] + rax[1] * rax[1]);
-			double th = Math.atan2(r_axis_len, dot_prod) / 2;
-			double sin = Math.sin(th);
-			Quaternion p = new Quaternion(0, new double[] { x, y, z });
-//			p.x = x;
-//			p.y = y;
-//			p.z = z;
-//			p.w = 0;
-			Quaternion qx = new Quaternion(Math.cos(th), pdir[0] * sin, pdir[1] * sin, pdir[2] * sin);
-			Quaternion r = new Quaternion(Math.cos(th), -pdir[0] * sin, -pdir[1] * sin, -pdir[2] * sin);
-			r.multiply(p);
-			r.multiply(qx);
-			//
-//			x = r.x;
-//			y = r.y;
-//			z = r.z;
-		}
-		//*/
-
-//		SkeletonRoot root = getRoot();
-//		double rx = MathExt.trim(getSkeleton().rotateV + 0*root.getThetaX());
-//		double ry = MathExt.trim(getSkeleton().rotateH + 0*root.getThetaY());
-//		double rz = MathExt.trim(0*root.getThetaZ());
-//		yz = new P2D(y, z).rotate(rx);
-//		y = yz.x;
-//		z = yz.y;
-//		zx = new P2D(z, x).rotate(ry);
-//		z = zx.x;
-//		x = zx.y;
-//		xy = new P2D(x, y).rotate(rz);
-//		x = xy.x;
-//		y = xy.y;
-		P3D rp = new P3D(x, y, z).rotate(getSkeleton().rotateV, getSkeleton().rotateH, 0);
-		x = rp.x;
-		y = rp.y;
-		z = rp.z;
-
-		P3D nextPt = prevPt.add(-x, -y, z);
-		int x2 = (int) (nextPt.x * s2);
-		int y2 = (int) (nextPt.y * s2);
+		P3D rp = pt.rotate(getSkeleton().rotateV, getSkeleton().rotateH, 0);
+		double x = rp.x;
+		double y = rp.y;
+		double z = rp.z;
+		P3D nextPt = new P3D(-x, y, z);
+		int nextX = (int) (nextPt.x * s2);
+		int nextY = (int) (nextPt.y * s2);
 
 //		String info = String.format("[%3.2f,%3.2f,%3.2f]", tx.toDegree(), ty.toDegree(), tz.toDegree());
 //		g.setColor(Color.GRAY);
@@ -316,9 +283,9 @@ public final class SkeletonBone extends SkeletonNode {
 //			g.drawString(info + name, prevX + 10 * (depth - 1), prevY + 10);
 //		}
 
-		g.setColor(Color.GRAY);
-		g.drawRoundRect(x2, y2, 3, 3, 3, 3);
-		g.drawLine(prevX, prevY, x2, y2);
+		g.setColor(Color.LIGHT_GRAY);
+		g.drawRoundRect(nextX, nextY, 3, 3, 3, 3);
+		g.drawLine(prevX, prevY, nextX, nextY);
 
 		setPoint(nextPt);
 		for (SkeletonNode node : getJoint()) {

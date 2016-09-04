@@ -4,7 +4,6 @@ import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.math3.genetics.CrossoverPolicy;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 
@@ -19,7 +18,7 @@ public abstract class SkeletonNode {
 	protected Radian thetaX = new Radian(null);
 	protected Radian thetaY = new Radian(null);
 	protected Radian thetaZ = new Radian(null);
-	private P3D point;
+	private P3D point = P3D.ORIGIN;
 	private Skeleton skeleton;
 
 	protected List<SkeletonNode> getJoint() {
@@ -37,35 +36,14 @@ public abstract class SkeletonNode {
 	public SkeletonRoot getRoot() {
 		return this.skeleton.getRoot();
 	}
-	public Double getInhelitThetaX() {
-		Double result = null;
 
-		if (this.thetaX != null) {
-			result = this.thetaX.getRadian();
-		} else if (this.parent != null) {
-			result = this.parent.getInhelitThetaX();
-		}
-		return result;
-	}
-	public Double getInhelitThetaY() {
-		Double result = null;
-
-		if (this.thetaY != null) {
-			result = this.thetaY.getRadian();
-		} else if (this.parent != null) {
-			result = this.parent.getInhelitThetaY();
-		}
-		return result;
-	}
-	public Double getInhelitThetaZ() {
-		Double result = null;
-
-		if (this.thetaZ != null) {
-			result = this.thetaZ.getRadian();
-		} else if (this.parent != null) {
-			result = this.parent.getInhelitThetaZ();
-		}
-		return result;
+	protected RealMatrix getPositionMatrix() {
+		return MatrixUtils.createRealMatrix(new double[][] {
+			{ 1, 0, 0, -this.point.x },
+			{ 0, 1, 0, -this.point.x },
+			{ 0, 0, 1, -this.point.z },
+			{ 0, 0, 0, 1 },
+		});
 	}
 
 	public RealMatrix getAxisMatrix() {
@@ -74,6 +52,14 @@ public abstract class SkeletonNode {
 		RealMatrix mz = this.axisZ.rotateZ();
 
 		return mx.multiply(my).multiply(mz);
+	}
+
+	public RealMatrix getAxisRevMatrix() {
+		RealMatrix mx = this.axisX.rotateX();
+		RealMatrix my = this.axisY.rotateY();
+		RealMatrix mz = this.axisZ.rotateZ();
+
+		return mz.multiply(my).multiply(mx);
 	}
 
 	public RealMatrix getAccumAxis() {
@@ -107,7 +93,14 @@ public abstract class SkeletonNode {
 	}
 
 	protected RealMatrix getAccum() {
-		return new Radian(null).rotateX();
+		RealMatrix dx = getPositionMatrix();
+		RealMatrix ax = getAxisMatrix();
+		RealMatrix tx = getThetaMatrix();
+
+		if (this.parent != null) {
+			return this.parent.getAccum().multiply(ax).multiply(tx).multiply(dx);
+		}
+		return ax.multiply(tx).multiply(dx);
 	}
 
 	/**

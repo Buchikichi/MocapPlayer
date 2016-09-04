@@ -1,10 +1,15 @@
 package to.kit.mocap.struct;
 
+import org.apache.commons.math3.linear.RealMatrix;
+
 /**
  * The position in 3D.
  * @author Hidetaka Sasai
  */
 public final class P3D {
+	/** origin. */
+	public static final P3D ORIGIN = new P3D(0, 0, 0);
+
 	/** x. */
 	public double x;
 	/** y. */
@@ -44,6 +49,10 @@ public final class P3D {
 		return new P3D(nx, ny, nz);
 	}
 
+	public P3D affine(RealMatrix mx) {
+		return affine(mx.getData());
+	}
+
 	public P3D rotate(double tx, double ty, double tz) {
 		double nx = this.x;
 		double ny = this.y;
@@ -58,5 +67,10 @@ public final class P3D {
 		ny = yz.x;
 		nz = yz.y;
 		return new P3D(nx, ny, nz);
+	}
+
+	@Override
+	public String toString() {
+		return "P3D [x=" + this.x + ", y=" + this.y + ", z=" + this.z + "]";
 	}
 }
