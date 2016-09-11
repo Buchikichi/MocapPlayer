@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 
 import org.apache.commons.math3.complex.Quaternion;
-import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -217,18 +216,8 @@ public final class SkeletonBone extends SkeletonNode {
 	}
 
 	@Override
-	protected RealMatrix getPositionMatrix() {
-		return MatrixUtils.createRealMatrix(new double[][] {
-			{ 1, 0, 0, -this.dir[0] * this.length },
-			{ 0, 1, 0, -this.dir[1] * this.length },
-			{ 0, 0, 1, -this.dir[2] * this.length },
-			{ 0, 0, 0, 1 },
-		});
-	}
-
-	@Override
 	protected RealMatrix getAccum() {
-		RealMatrix pm = getPositionMatrix();
+		RealMatrix pm = getTranslateMatrix();
 		RealMatrix am = getAxisMatrix();
 
 		RealMatrix tx = this.thetaX.rotateX();
@@ -248,8 +237,8 @@ public final class SkeletonBone extends SkeletonNode {
 
 	@Override
 	public void draw(Graphics2D g) {
-		double s1 = 15;
-		double s2 = 15;
+		double s1 = 10;
+		double s2 = 10;
 		SkeletonNode parent = getParent();
 		P3D prevPt = parent.getPoint();
 		int prevX = (int) (prevPt.x * s1);
@@ -259,15 +248,15 @@ public final class SkeletonBone extends SkeletonNode {
 //		P3D axi = getAxis(g, prevX, prevY);
 
 		RealMatrix pa = parent.getAccum();
-		RealMatrix pm = getPositionMatrix();
+		RealMatrix pm = getTranslateMatrix();
 		RealMatrix am = getAxisMatrix();
 		RealMatrix tm = getThetaMatrix();
 		RealMatrix mat = pa.multiply(am).multiply(tm).multiply(pm);
 
 //		P3D pt = getNextPoint().affine(getAccum());
 //		P3D pt = P3D.ORIGIN.affine(getDirMatrix()).affine(ax.multiply(tx)).affine(px);
-		P3D pt = P3D.ORIGIN.affine(getAccum());
-//		P3D pt = P3D.ORIGIN.affine(mat);
+//		P3D pt = P3D.ORIGIN.affine(getAccum());
+		P3D pt = P3D.ORIGIN.affine(mat);
 
 		P3D rp = pt.rotate(getSkeleton().rotateV, getSkeleton().rotateH, 0);
 		double x = rp.x;

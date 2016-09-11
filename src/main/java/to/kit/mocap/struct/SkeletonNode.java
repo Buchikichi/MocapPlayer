@@ -18,6 +18,7 @@ public abstract class SkeletonNode {
 	protected Radian thetaX = new Radian(null);
 	protected Radian thetaY = new Radian(null);
 	protected Radian thetaZ = new Radian(null);
+	protected P3D translate = P3D.ORIGIN;
 	private P3D point = P3D.ORIGIN;
 	private Skeleton skeleton;
 
@@ -37,29 +38,29 @@ public abstract class SkeletonNode {
 		return this.skeleton.getRoot();
 	}
 
-	protected RealMatrix getPositionMatrix() {
+	protected RealMatrix getTranslateMatrix() {
 		return MatrixUtils.createRealMatrix(new double[][] {
-			{ 1, 0, 0, -this.point.x },
-			{ 0, 1, 0, -this.point.x },
-			{ 0, 0, 1, -this.point.z },
+			{ 1, 0, 0, -this.translate.x },
+			{ 0, 1, 0, -this.translate.y },
+			{ 0, 0, 1, -this.translate.z },
 			{ 0, 0, 0, 1 },
 		});
 	}
 
 	public RealMatrix getAxisMatrix() {
-		RealMatrix mx = this.axisX.rotateX();
-		RealMatrix my = this.axisY.rotateY();
-		RealMatrix mz = this.axisZ.rotateZ();
+		RealMatrix ax = this.axisX.rotateX();
+		RealMatrix ay = this.axisY.rotateY();
+		RealMatrix az = this.axisZ.rotateZ();
 
-		return mx.multiply(my).multiply(mz);
+		return ax.multiply(ay).multiply(az);
 	}
 
 	public RealMatrix getAxisRevMatrix() {
-		RealMatrix mx = this.axisX.rotateX();
-		RealMatrix my = this.axisY.rotateY();
-		RealMatrix mz = this.axisZ.rotateZ();
+		RealMatrix ax = this.axisX.rev().rotateX();
+		RealMatrix ay = this.axisY.rev().rotateY();
+		RealMatrix az = this.axisZ.rev().rotateZ();
 
-		return mz.multiply(my).multiply(mx);
+		return az.multiply(ay).multiply(ax);
 	}
 
 	public RealMatrix getAccumAxis() {
@@ -72,10 +73,7 @@ public abstract class SkeletonNode {
 	}
 
 	public RealMatrix getAccumAxisRev() {
-		RealMatrix ax = this.axisX.rev().rotateX();
-		RealMatrix ay = this.axisY.rev().rotateY();
-		RealMatrix az = this.axisZ.rev().rotateZ();
-		RealMatrix ma = az.multiply(ay).multiply(ax);
+		RealMatrix ma = getAxisRevMatrix();
 
 		if (this.parent != null) {
 //			return this.parent.getAccumAxisRev().multiply(ma);
@@ -93,7 +91,7 @@ public abstract class SkeletonNode {
 	}
 
 	protected RealMatrix getAccum() {
-		RealMatrix dx = getPositionMatrix();
+		RealMatrix dx = getTranslateMatrix();
 		RealMatrix ax = getAxisMatrix();
 		RealMatrix tx = getThetaMatrix();
 
@@ -201,7 +199,18 @@ public abstract class SkeletonNode {
 	public void setThetaZ(Radian tZ) {
 		this.thetaZ = tZ;
 	}
-
+	/**
+	 * @return the transform
+	 */
+	public P3D getTranslate() {
+		return this.translate;
+	}
+	/**
+	 * @param value the transform to set
+	 */
+	public void setTranslate(P3D value) {
+		this.translate = value;
+	}
 	/**
 	 * @return the point
 	 */

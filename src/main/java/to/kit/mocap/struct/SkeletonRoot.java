@@ -2,7 +2,6 @@ package to.kit.mocap.struct;
 
 import java.awt.Graphics2D;
 
-import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 
 /**
@@ -14,21 +13,10 @@ public final class SkeletonRoot extends SkeletonNode {
 	private String axis;
 	private double[] position;
 	private String orientation;
-	private P3D transform = P3D.ORIGIN;
-
-	@Override
-	protected RealMatrix getPositionMatrix() {
-		return MatrixUtils.createRealMatrix(new double[][] {
-			{ 1, 0, 0, -this.transform.x },
-			{ 0, 1, 0, -this.transform.x },
-			{ 0, 0, 1, -this.transform.z },
-			{ 0, 0, 0, 1 },
-		});
-	}
 
 	@Override
 	protected RealMatrix getAccum() {
-		RealMatrix dx = getPositionMatrix();
+		RealMatrix dx = getTranslateMatrix();
 		RealMatrix mx = this.thetaX.rotateX();
 		RealMatrix my = this.thetaY.rotateY();
 		RealMatrix mz = this.thetaZ.rotateZ();
@@ -80,7 +68,7 @@ public final class SkeletonRoot extends SkeletonNode {
 	 */
 	public void setPosition(double[] values) {
 		if (this.position != null && 3 <= this.position.length) {
-			this.setTransform(new P3D(this.position[0], this.position[1], this.position[2]));
+			this.setTranslate(new P3D(this.position[0], this.position[1], this.position[2]));
 		}
 		this.position = values;
 	}
@@ -95,18 +83,6 @@ public final class SkeletonRoot extends SkeletonNode {
 	 */
 	public void setOrientation(String orientation) {
 		this.orientation = orientation;
-	}
-	/**
-	 * @return the transform
-	 */
-	public P3D getTransform() {
-		return this.transform;
-	}
-	/**
-	 * @param transform the transform to set
-	 */
-	public void setTransform(P3D transform) {
-		this.transform = transform;
 	}
 
 	@Override

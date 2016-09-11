@@ -31,7 +31,7 @@ import javax.swing.SwingConstants;
  */
 public class MocapPlayerMain extends JFrame {
 	private static final int FRAME_WIDTH = 1600;
-	private static final int FRAME_HEIGHT = 1200;
+	private static final int FRAME_HEIGHT = 1024;
 	final MocapCanvas canvas = new MocapCanvas();
 	final JSlider sliderH = new JSlider();
 	final JSlider sliderV = new JSlider();
@@ -44,6 +44,7 @@ public class MocapPlayerMain extends JFrame {
 
 		if (skeleton != null) {
 			this.canvas.add(skeleton);
+			this.canvas.repaint();
 		}
 	}
 
@@ -149,7 +150,7 @@ public class MocapPlayerMain extends JFrame {
 		panel.add(this.sliderH, BorderLayout.NORTH);
 		changeRotateH();
 		this.sliderV.setMinimum(-179);
-		this.sliderV.setValue(-179);
+		this.sliderV.setValue(0);
 		this.sliderV.setMaximum(180);
 		this.sliderV.setOrientation(SwingConstants.VERTICAL);
 		this.sliderV.addChangeListener(new ChangeListener() {
@@ -175,9 +176,9 @@ public class MocapPlayerMain extends JFrame {
 				if (max < ++val) {
 					val = sld.getMinimum();
 				}
-				sld.setValue(val);
+//				sld.setValue(val);
 			}
-		}, 0, 100);
+		}, 0, 33);
 	}
 
 	/**

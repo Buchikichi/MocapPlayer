@@ -47,7 +47,7 @@ public final class Skeleton {
 	private void setRootPoint(MotionRoot motionRoot) {
 		Double[] theta = motionRoot.getTheta();
 
-		this.root.setTransform(motionRoot.getPoint());
+		this.root.setTranslate(motionRoot.getPoint());
 		this.root.setThetaX(new Radian(theta[0]));
 		this.root.setThetaY(new Radian(theta[1]));
 		this.root.setThetaZ(new Radian(theta[2]));

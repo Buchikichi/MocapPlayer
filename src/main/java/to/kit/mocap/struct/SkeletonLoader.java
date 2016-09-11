@@ -27,17 +27,13 @@ public final class SkeletonLoader {
 			SkeletonBone aBone = (SkeletonBone) parent;
 			RealMatrix mx = aBone.getAccumAxisRev();
 			double[] dir = aBone.getDir();
-			double x = dir[0];
-			double y = dir[1];
-			double z = dir[2];
+			double len = aBone.getLength();
+			double x = dir[0] * len;
+			double y = dir[1] * len;
+			double z = dir[2] * len;
 			P3D pt = new P3D(x, y, z).affine(mx);
 
-			x = pt.x;
-			y = pt.y;
-			z = pt.z;
-			dir[0] = x;
-			dir[1] = y;
-			dir[2] = z;
+			aBone.setTranslate(pt);
 		}
 		for (SkeletonNode child : parent.getJoint()) {
 			adjustDirection(child);
