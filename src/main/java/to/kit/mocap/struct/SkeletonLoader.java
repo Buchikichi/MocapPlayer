@@ -25,7 +25,7 @@ public final class SkeletonLoader {
 	private void adjustDirection(SkeletonNode parent) {
 		if (parent instanceof SkeletonBone) {
 			SkeletonBone aBone = (SkeletonBone) parent;
-			RealMatrix mx = aBone.getAccumAxisRev();
+			RealMatrix mx = aBone.getAxisRevMatrix();
 			double[] dir = aBone.getDir();
 			double len = aBone.getLength();
 			double x = dir[0] * len;

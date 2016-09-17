@@ -87,10 +87,9 @@ public final class SkeletonRoot extends SkeletonNode {
 
 	@Override
 	public void draw(Graphics2D g) {
-		P3D pt = P3D.ORIGIN.affine(getAccum()).rotate(getSkeleton().rotateV, getSkeleton().rotateH, 0);
-		P3D nextPt = new P3D(-pt.x, pt.y, pt.z);
+		P3D pt = P3D.ORIGIN.affine(getAccum());
 
-		setPoint(nextPt);
+		setPoint(pt);
 		for (SkeletonNode node : getJoint()) {
 			node.draw(g);
 		}

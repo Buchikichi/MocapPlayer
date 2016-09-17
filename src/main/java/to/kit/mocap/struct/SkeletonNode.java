@@ -7,6 +7,10 @@ import java.util.List;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 
+/**
+ * Node.
+ * @author Hidetaka Sasai
+ */
 public abstract class SkeletonNode {
 	private String name;
 	private int depth;
@@ -26,79 +30,59 @@ public abstract class SkeletonNode {
 		return this.joint;
 	}
 
-	public abstract void draw(Graphics2D g); 
+	protected abstract void draw(Graphics2D g); 
 
-	public void add(SkeletonNode node) {
+	protected void add(SkeletonNode node) {
 		node.depth = this.depth + 1;
 		node.parent = this;
 		this.joint.add(node);
 	}
 
-	public SkeletonRoot getRoot() {
+	protected SkeletonRoot getRoot() {
 		return this.skeleton.getRoot();
 	}
 
 	protected RealMatrix getTranslateMatrix() {
 		return MatrixUtils.createRealMatrix(new double[][] {
-			{ 1, 0, 0, -this.translate.x },
-			{ 0, 1, 0, -this.translate.y },
-			{ 0, 0, 1, -this.translate.z },
+			{ 1, 0, 0, this.translate.x },
+			{ 0, 1, 0, this.translate.y },
+			{ 0, 0, 1, this.translate.z },
 			{ 0, 0, 0, 1 },
 		});
 	}
 
-	public RealMatrix getAxisMatrix() {
-		RealMatrix ax = this.axisX.rotateX();
-		RealMatrix ay = this.axisY.rotateY();
-		RealMatrix az = this.axisZ.rotateZ();
+	protected RealMatrix getAxisMatrix() {
+		RealMatrix mx = this.axisX.rotateX();
+		RealMatrix my = this.axisY.rotateY();
+		RealMatrix mz = this.axisZ.rotateZ();
 
-		return ax.multiply(ay).multiply(az);
+		return mz.multiply(my).multiply(mx);
 	}
 
-	public RealMatrix getAxisRevMatrix() {
-		RealMatrix ax = this.axisX.rev().rotateX();
-		RealMatrix ay = this.axisY.rev().rotateY();
-		RealMatrix az = this.axisZ.rev().rotateZ();
-
-		return az.multiply(ay).multiply(ax);
-	}
-
-	public RealMatrix getAccumAxis() {
-		RealMatrix ma = getAxisMatrix();
-
-		if (this.parent != null) {
-			return this.parent.getAccumAxis().multiply(ma);
-		}
-		return ma;
-	}
-
-	public RealMatrix getAccumAxisRev() {
-		RealMatrix ma = getAxisRevMatrix();
-
-		if (this.parent != null) {
-//			return this.parent.getAccumAxisRev().multiply(ma);
-			return ma.multiply(this.parent.getAccumAxisRev());
-		}
-		return ma;
-	}
-
-	public RealMatrix getThetaMatrix() {
-		RealMatrix mx = this.thetaX.rotateX();
-		RealMatrix my = this.thetaY.rotateY();
-		RealMatrix mz = this.thetaZ.rotateZ();
+	protected RealMatrix getAxisRevMatrix() {
+		RealMatrix mx = this.axisX.rev().rotateX();
+		RealMatrix my = this.axisY.rev().rotateY();
+		RealMatrix mz = this.axisZ.rev().rotateZ();
 
 		return mx.multiply(my).multiply(mz);
 	}
 
-	protected RealMatrix getAccum() {
-		RealMatrix dx = getTranslateMatrix();
-		RealMatrix ax = getAxisMatrix();
-		RealMatrix tx = getThetaMatrix();
+	protected RealMatrix getThetaMatrix() {
+		RealMatrix mx = this.thetaX.rotateX();
+		RealMatrix my = this.thetaY.rotateY();
+		RealMatrix mz = this.thetaZ.rotateZ();
 
-		if (this.parent != null) {
-			return this.parent.getAccum().multiply(ax).multiply(tx).multiply(dx);
-		}
-		return ax.multiply(tx).multiply(dx);
+		return mz.multiply(my).multiply(mx);
+	}
+
+	protected RealMatrix getAccum() {
+		RealMatrix pm = this.parent.getAxisRevMatrix();
+		RealMatrix am = getAxisMatrix();
+		RealMatrix tm = getThetaMatrix();
+		RealMatrix tr = getTranslateMatrix();
+
+		RealMatrix mat = pm.multiply(am).multiply(tm).multiply(tr);
+		return this.parent.getAccum().multiply(mat);
 	}
 
 	/**
