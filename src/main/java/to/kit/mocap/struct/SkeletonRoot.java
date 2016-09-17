@@ -10,19 +10,16 @@ import org.apache.commons.math3.linear.RealMatrix;
  */
 public final class SkeletonRoot extends SkeletonNode {
 	private String order;
-	private String axis;
+	private String axisOrder;
 	private double[] position;
 	private String orientation;
 
 	@Override
 	protected RealMatrix getAccum() {
 		RealMatrix dx = getTranslateMatrix();
-		RealMatrix mx = this.thetaX.rotateX();
-		RealMatrix my = this.thetaY.rotateY();
-		RealMatrix mz = this.thetaZ.rotateZ();
-		RealMatrix tx = mz.multiply(my).multiply(mx);
+		RealMatrix tm = getThetaMatrix();
 
-		return dx.multiply(tx);
+		return dx.multiply(tm);
 	}
 
 	/**
@@ -48,14 +45,14 @@ public final class SkeletonRoot extends SkeletonNode {
 	/**
 	 * @return the axis
 	 */
-	public String getAxis() {
-		return this.axis;
+	public String getAxisOrder() {
+		return this.axisOrder;
 	}
 	/**
 	 * @param axis the axis to set
 	 */
-	public void setAxis(String axis) {
-		this.axis = axis;
+	public void setAxisOrder(String axis) {
+		this.axisOrder = axis;
 	}
 	/**
 	 * @return the position

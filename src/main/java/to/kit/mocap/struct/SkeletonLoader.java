@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.commons.math3.linear.RealMatrix;
 
 /**
  * SkeletonLoader.
@@ -22,20 +21,13 @@ public final class SkeletonLoader {
 	private SkeletonBone bone;
 	private int cnt;
 
-	private void adjustDirection(SkeletonNode parent) {
-		if (parent instanceof SkeletonBone) {
-			SkeletonBone aBone = (SkeletonBone) parent;
-			RealMatrix mx = aBone.getAxisRevMatrix();
-			double[] dir = aBone.getDir();
-			double len = aBone.getLength();
-			double x = dir[0] * len;
-			double y = dir[1] * len;
-			double z = dir[2] * len;
-			P3D pt = new P3D(x, y, z).affine(mx);
+	private void adjustDirection(SkeletonNode node) {
+		if (node instanceof SkeletonBone) {
+			SkeletonBone aBone = (SkeletonBone) node;
 
-			aBone.setTranslate(pt);
+			aBone.adjust();
 		}
-		for (SkeletonNode child : parent.getJoint()) {
+		for (SkeletonNode child : node.getJoint()) {
 			adjustDirection(child);
 		}
 	}
@@ -56,7 +48,7 @@ public final class SkeletonLoader {
 			skeleton.add(this.root);
 		}
 		if ("axis".equals(this.segment)) {
-			this.root.setAxis(param[0]);
+			this.root.setAxisOrder(param[0]);
 		} else if ("order".equals(this.segment)) {
 			this.root.setOrder(param[0]);
 		} else if ("position".equals(this.segment)) {
@@ -78,7 +70,7 @@ public final class SkeletonLoader {
 	}
 
 	private void processBoneAxis(String[] param) {
-		Radian[] values = new Radian[3];
+		Double[] values = new Double[3];
 		List<String> order = new ArrayList<>();
 
 		for (int ix = 0; ix < param.length; ix++) {
@@ -86,23 +78,26 @@ public final class SkeletonLoader {
 				double deg = NumberUtils.toDouble(param[ix]);
 				Double rad = Double.valueOf(deg * Math.PI / 180);
 
-				values[ix] = new Radian(rad);
+				values[ix] = rad;
 				continue;
 			}
 			for (char c : param[ix].toCharArray()) {
 				order.add(String.valueOf(c).toUpperCase());
 			}
 		}
+		//
+		Rotation axis = this.bone.getAxis();
+
 		for (int ix = 0; ix < values.length && ix < order.size(); ix++) {
 			String c = order.get(ix);
-			Radian val = values[ix];
+			Double val = values[ix];
 
 			if ("X".equals(c)) {
-				this.bone.setAxisX(val);
+				axis.x = val;
 			} else if ("Y".equals(c)) {
-				this.bone.setAxisY(val);
+				axis.y = val;
 			} else if ("Z".equals(c)) {
-				this.bone.setAxisZ(val);
+				axis.z = val;
 			}
 		}
 	}

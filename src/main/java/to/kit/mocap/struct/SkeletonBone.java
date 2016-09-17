@@ -20,22 +20,86 @@ public final class SkeletonBone extends SkeletonNode {
 	private Limit limitZ = new Limit();
 
 	/**
+	 * adjust.
+	 */
+	public void adjust() {
+		double x = this.dir[0] * this.length;
+		double y = this.dir[1] * this.length;
+		double z = this.dir[2] * this.length;
+
+		this.translate = new P3D(x, y, z).affine(getAxis().getRevMatrix());
+		//
+		RealMatrix pm = getParent().getAxis().getRevMatrix();
+		RealMatrix am = getAxis().getMatrix();
+
+		this.axisMatrix = pm.multiply(am);
+	}
+
+	/**
+	 * @return the dir
+	 */
+	protected double[] getDir() {
+		return this.dir;
+	}
+	/**
 	 * @return the id
 	 */
-	public int getId() {
+	protected int getId() {
 		return this.id;
 	}
 	/**
 	 * @param value the id to set
 	 */
-	public void setId(int value) {
+	protected void setId(int value) {
 		this.id = value;
 	}
 	/**
-	 * @return the dir
+	 * @return the dof
 	 */
-	public double[] getDir() {
-		return this.dir;
+	protected String[] getDof() {
+		return this.dof;
+	}
+	/**
+	 * @param dof the dof to set
+	 */
+	protected void setDof(String[] dof) {
+		this.dof = dof;
+	}
+	/**
+	 * @return the limitX
+	 */
+	protected Limit getLimitX() {
+		return this.limitX;
+	}
+	/**
+	 * @param limitX the limitX to set
+	 */
+	protected void setLimitX(Limit limitX) {
+		this.limitX = limitX;
+	}
+	/**
+	 * @return the limitY
+	 */
+	protected Limit getLimitY() {
+		return this.limitY;
+	}
+	/**
+	 * @param limitY the limitY to set
+	 */
+	protected void setLimitY(Limit limitY) {
+		this.limitY = limitY;
+	}
+	/**
+	 * @return the limitZ
+	 */
+	protected Limit getLimitZ() {
+		return this.limitZ;
+	}
+	/**
+	 * @param limitZ the limitZ to set
+	 */
+	protected void setLimitZ(Limit limitZ) {
+		this.limitZ = limitZ;
 	}
 	/**
 	 * @return the length
@@ -48,54 +112,6 @@ public final class SkeletonBone extends SkeletonNode {
 	 */
 	public void setLength(double length) {
 		this.length = length;
-	}
-	/**
-	 * @return the dof
-	 */
-	public String[] getDof() {
-		return this.dof;
-	}
-	/**
-	 * @param dof the dof to set
-	 */
-	public void setDof(String[] dof) {
-		this.dof = dof;
-	}
-	/**
-	 * @return the limitX
-	 */
-	public Limit getLimitX() {
-		return this.limitX;
-	}
-	/**
-	 * @param limitX the limitX to set
-	 */
-	public void setLimitX(Limit limitX) {
-		this.limitX = limitX;
-	}
-	/**
-	 * @return the limitY
-	 */
-	public Limit getLimitY() {
-		return this.limitY;
-	}
-	/**
-	 * @param limitY the limitY to set
-	 */
-	public void setLimitY(Limit limitY) {
-		this.limitY = limitY;
-	}
-	/**
-	 * @return the limitZ
-	 */
-	public Limit getLimitZ() {
-		return this.limitZ;
-	}
-	/**
-	 * @param limitZ the limitZ to set
-	 */
-	public void setLimitZ(Limit limitZ) {
-		this.limitZ = limitZ;
 	}
 
 	@Override

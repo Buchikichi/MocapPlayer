@@ -3,7 +3,11 @@ package to.kit.mocap;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -15,15 +19,17 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.KeyStroke;
+import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import net.arnx.jsonic.JSON;
 import to.kit.mocap.component.MocapCanvas;
 import to.kit.mocap.struct.Motion;
 import to.kit.mocap.struct.MotionLoader;
 import to.kit.mocap.struct.Skeleton;
 import to.kit.mocap.struct.SkeletonLoader;
-import javax.swing.SwingConstants;
 
 /**
  * Motion Capture Data Player.
@@ -52,7 +58,7 @@ public class MocapPlayerMain extends JFrame {
 		MotionLoader loader = new MotionLoader();
 		List<Motion> motionList = loader.load(file);
 
-		this.canvas.add(motionList);
+		this.canvas.set(motionList);
 		this.slider.setMinimum(0);
 		this.slider.setMaximum(motionList.size() - 1);
 		this.slider.setValue(0);
@@ -72,6 +78,27 @@ public class MocapPlayerMain extends JFrame {
 			loadSkeleton(file);
 		} else if (name.endsWith(".amc")) {
 			loadMotion(file);
+		}
+	}
+
+	protected void saveFile() {
+		Skeleton skeleton = this.canvas.getSkeleton();
+
+		if (skeleton == null) {
+			return;
+		}
+		int res = this.chooser.showSaveDialog(this);
+
+		if (res != JFileChooser.APPROVE_OPTION) {
+			return;
+		}
+		File file = this.chooser.getSelectedFile();
+		String json = JSON.encode(skeleton);
+
+		try (FileWriter out = new FileWriter(file)) {
+			out.write(json);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -112,6 +139,15 @@ public class MocapPlayerMain extends JFrame {
 			}
 		});
 		mnFile.add(mntmOpen);
+		mnFile.addSeparator();
+		JMenuItem mntmSave = new JMenuItem("Save");
+		mntmSave.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				saveFile();
+			}
+		});
+		mntmSave.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
+		mnFile.add(mntmSave);
 		mnFile.addSeparator();
 
 		JMenuItem mntmExit = new JMenuItem("Exit");

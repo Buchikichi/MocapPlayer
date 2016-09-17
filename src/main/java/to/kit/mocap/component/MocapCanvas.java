@@ -24,6 +24,16 @@ public final class MocapCanvas extends Canvas {
 	private int current;
 
 	/**
+	 * Get the Skeleton.
+	 * @return skeleton
+	 */
+	public Skeleton getSkeleton() {
+		if (this.skeletonList.isEmpty()) {
+			return null;
+		}
+		return this.skeletonList.get(0);
+	}
+	/**
 	 * Add the Skeleton.
 	 * @param skeleton the Skeleton
 	 */
@@ -33,7 +43,8 @@ public final class MocapCanvas extends Canvas {
 	/**
 	 * @param list
 	 */
-	public void add(List<Motion> list) {
+	public void set(List<Motion> list) {
+		this.motionList.clear();
 		this.motionList.addAll(list);
 	}
 	/**
