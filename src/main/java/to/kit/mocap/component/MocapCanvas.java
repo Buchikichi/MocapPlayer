@@ -41,6 +41,12 @@ public final class MocapCanvas extends Canvas {
 		this.skeletonList.add(skeleton);
 	}
 	/**
+	 * @return the motionList
+	 */
+	public List<Motion> getMotionList() {
+		return this.motionList;
+	}
+	/**
 	 * @param list
 	 */
 	public void set(List<Motion> list) {

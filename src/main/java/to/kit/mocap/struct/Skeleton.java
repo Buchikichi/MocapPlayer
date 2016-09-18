@@ -7,6 +7,10 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Skeleton.
+ * @author Hidetaka Sasai
+ */
 public final class Skeleton {
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(Skeleton.class);
@@ -45,43 +49,35 @@ public final class Skeleton {
 	}
 
 	private void setRootPoint(MotionRoot motionRoot) {
-		Double[] theta = motionRoot.getTheta();
+		Rotation theta = motionRoot.getTheta();
 
 		this.root.setTranslate(motionRoot.getPoint());
-		this.root.setThetaX(new Radian(theta[0]));
-		this.root.setThetaY(new Radian(theta[1]));
-		this.root.setThetaZ(new Radian(theta[2]));
+		this.root.setThetaX(new Radian(theta.x));
+		this.root.setThetaY(new Radian(theta.y));
+		this.root.setThetaZ(new Radian(theta.z));
+	}
+
+	protected SkeletonNode getNode(String name) {
+		if (!this.nodeMap.containsKey(name)) {
+			LOG.error("Bad parent name [{}].", name);
+			return null;
+		}
+		return this.nodeMap.get(name);
 	}
 
 	public void shift(Motion motion) {
 		for (MotionBone motionBone : motion) {
-			String name = motionBone.getName();
-
-			if (!this.nodeMap.containsKey(name)) {
-				LOG.error("Bad parent name [{}].", name);
-				continue;
-			}
 			if (motionBone instanceof MotionRoot) {
 				setRootPoint((MotionRoot) motionBone);
 				continue;
 			}
-			SkeletonBone bone = (SkeletonBone) this.nodeMap.get(name);
-			Double[] theta = motionBone.getTheta();
-			int ix = 0;
+			String name = motionBone.getName();
+			SkeletonBone bone = (SkeletonBone) getNode(name);
+			Rotation theta = motionBone.getTheta();
 
-			for (String deg : bone.getDof()) {
-				Radian val = new Radian(theta[ix++]);
-
-				if ("rx".equals(deg)) {
-					bone.setThetaX(val);
-				} else if ("ry".equals(deg)) {
-					bone.setThetaY(val);
-				} else if ("rz".equals(deg)) {
-					bone.setThetaZ(val);
-				} else {
-					LOG.error("Unknown [{}].", deg);
-				}
-			}
+			bone.setThetaX(new Radian(theta.x));
+			bone.setThetaY(new Radian(theta.y));
+			bone.setThetaZ(new Radian(theta.z));
 		}
 	}
 

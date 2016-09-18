@@ -55,8 +55,13 @@ public class MocapPlayerMain extends JFrame {
 	}
 
 	private void loadMotion(File file) {
+		Skeleton skeleton = this.canvas.getSkeleton();
+
+		if (skeleton == null) {
+			return;
+		}
 		MotionLoader loader = new MotionLoader();
-		List<Motion> motionList = loader.load(file);
+		List<Motion> motionList = loader.load(file, skeleton);
 
 		this.canvas.set(motionList);
 		this.slider.setMinimum(0);
@@ -93,10 +98,20 @@ public class MocapPlayerMain extends JFrame {
 			return;
 		}
 		File file = this.chooser.getSelectedFile();
-		String json = JSON.encode(skeleton);
+		String asfJson = JSON.encode(skeleton);
 
 		try (FileWriter out = new FileWriter(file)) {
-			out.write(json);
+			out.write(asfJson);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		//
+		List<Motion> motionList = this.canvas.getMotionList();
+		File motionFile = new File(file.getParentFile(), "motion.json");
+		String motionJson = JSON.encode(motionList);
+
+		try (FileWriter out = new FileWriter(motionFile)) {
+			out.write(motionJson);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

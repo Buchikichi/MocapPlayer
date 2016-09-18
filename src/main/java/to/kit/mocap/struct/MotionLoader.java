@@ -9,25 +9,58 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.math.NumberUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+/**
+ * Motion loader.
+ * @author Hidetaka Sasai
+ */
 public final class MotionLoader {
-	private void loadDegrees(MotionBone bone, String[] param) {
-		Double[] theta = bone.getTheta();
+	/** Logger. */
+	private static final Logger LOG = LoggerFactory.getLogger(MotionLoader.class);
+
+	private void loadDegrees(MotionBone motionBone, String[] param, SkeletonBone bone) {
+		Rotation theta = motionBone.getTheta();
+		Double[] values = new Double[3];
 
 		for (int ix = 0; ix < 3 && ix < param.length; ix++) {
 			double deg = NumberUtils.toDouble(param[ix]);
 			double rad = deg * Math.PI / 180;
 
-			theta[ix] = Double.valueOf(rad);
+			values[ix] = Double.valueOf(rad);
+		}
+		if (bone == null) {
+			// root
+			theta.x = values[0];
+			theta.y = values[1];
+			theta.z = values[2];
+			return;
+		}
+		int ix = 0;
+
+		for(String deg : bone.getDof()) {
+			Double val = values[ix++];
+
+			if ("rx".equals(deg)) {
+				theta.x = val;
+			} else if ("ry".equals(deg)) {
+				theta.y = val;
+			} else if ("rz".equals(deg)) {
+				theta.z = val;
+			} else {
+				LOG.error("Unknown [{}].", deg);
+			}
 		}
 	}
 
 	/**
 	 * Load a motion file.
 	 * @param file AMC
+	 * @param skeleton 
 	 * @return motion list
 	 */
-	public List<Motion> load(final File file) {
+	public List<Motion> load(final File file, Skeleton skeleton) {
 		List<Motion> list = new ArrayList<>();
 		Motion motion = null;
 
@@ -66,14 +99,15 @@ public final class MotionLoader {
 					String[] degrees = Arrays.copyOfRange(param, 3, param.length);
 					P3D pt = new P3D(x, y, z);
 
-					loadDegrees(root, degrees);
+					loadDegrees(root, degrees, null);
 					root.setPoint(pt);
 					motion.add(root);
 				} else {
-					MotionBone bone = new MotionBone(id);
+					MotionBone motionBone = new MotionBone(id);
+					SkeletonBone bone = (SkeletonBone) skeleton.getNode(id);
 
-					loadDegrees(bone, param);
-					motion.add(bone);
+					loadDegrees(motionBone, param, bone);
+					motion.add(motionBone);
 				}
 			}
 		} catch (IOException e) {
