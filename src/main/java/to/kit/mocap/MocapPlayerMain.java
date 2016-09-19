@@ -165,6 +165,32 @@ public class MocapPlayerMain extends JFrame {
 		mnFile.add(mntmSave);
 		mnFile.addSeparator();
 
+		JMenu mnEdit = new JMenu("Edit");
+		menuBar.add(mnEdit);
+		JMenuItem mntmRemoveTheFront = new JMenuItem("Remove the front");
+		mntmRemoveTheFront.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				MocapCanvas cv = MocapPlayerMain.this.canvas;
+
+				cv.removeTheFront();
+				MocapPlayerMain.this.slider.setMaximum(cv.getMotionList().size() - 1);
+				MocapPlayerMain.this.slider.setValue(0);
+			}
+		});
+		mnEdit.add(mntmRemoveTheFront);
+		JMenuItem mntmRmoveTheRear = new JMenuItem("Rmove the rear");
+		mntmRmoveTheRear.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				MocapCanvas cv = MocapPlayerMain.this.canvas;
+
+				cv.removeTheRear();
+				int max = cv.getMotionList().size() - 1;
+				MocapPlayerMain.this.slider.setMaximum(max);
+				MocapPlayerMain.this.slider.setValue(max);
+			}
+		});
+		mnEdit.add(mntmRmoveTheRear);
+
 		JMenuItem mntmExit = new JMenuItem("Exit");
 		mntmExit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {

@@ -54,6 +54,18 @@ public final class MocapCanvas extends Canvas {
 		this.motionList.addAll(list);
 	}
 	/**
+	 * Remove the front motion.
+	 */
+	public void removeTheFront() {
+		this.motionList.subList(0, this.current).clear();
+	}
+	/**
+	 * Remove the rear motion.
+	 */
+	public void removeTheRear() {
+		this.motionList.subList(this.current, this.motionList.size()).clear();
+	}
+	/**
 	 * @param value the rotateH to set
 	 */
 	public void setRotateH(double value) {

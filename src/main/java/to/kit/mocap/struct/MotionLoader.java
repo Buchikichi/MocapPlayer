@@ -20,8 +20,7 @@ public final class MotionLoader {
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(MotionLoader.class);
 
-	private void loadDegrees(MotionBone motionBone, String[] param, SkeletonBone bone) {
-		Rotation theta = motionBone.getTheta();
+	private void loadDegrees(Rotation theta, String[] param, String[] dof) {
 		Double[] values = new Double[3];
 
 		for (int ix = 0; ix < 3 && ix < param.length; ix++) {
@@ -30,7 +29,7 @@ public final class MotionLoader {
 
 			values[ix] = Double.valueOf(rad);
 		}
-		if (bone == null) {
+		if (dof == null) {
 			// root
 			theta.x = values[0];
 			theta.y = values[1];
@@ -39,7 +38,7 @@ public final class MotionLoader {
 		}
 		int ix = 0;
 
-		for(String deg : bone.getDof()) {
+		for(String deg : dof) {
 			Double val = values[ix++];
 
 			if ("rx".equals(deg)) {
@@ -63,6 +62,7 @@ public final class MotionLoader {
 	public List<Motion> load(final File file, Skeleton skeleton) {
 		List<Motion> list = new ArrayList<>();
 		Motion motion = null;
+		P3D origin = null;
 
 		try (BufferedReader in = new BufferedReader(new FileReader(file))) {
 			for (;;) {
@@ -91,24 +91,32 @@ public final class MotionLoader {
 				if (motion == null) {
 					continue;
 				}
-				if ("root".equals(id)) {
-					MotionRoot root = new MotionRoot(id);
-					double x = NumberUtils.toDouble(param[0]);
-					double y = NumberUtils.toDouble(param[1]);
-					double z = NumberUtils.toDouble(param[2]);
-					String[] degrees = Arrays.copyOfRange(param, 3, param.length);
-					P3D pt = new P3D(x, y, z);
-
-					loadDegrees(root, degrees, null);
-					root.setPoint(pt);
-					motion.add(root);
-				} else {
+				if (!"root".equals(id)) {
 					MotionBone motionBone = new MotionBone(id);
+					Rotation theta = motionBone.getTheta();
 					SkeletonBone bone = (SkeletonBone) skeleton.getNode(id);
 
-					loadDegrees(motionBone, param, bone);
+					loadDegrees(theta, param, bone.getDof());
 					motion.add(motionBone);
+					continue;
 				}
+				MotionRoot root = new MotionRoot(id);
+				Rotation theta = root.getTheta();
+				double x = NumberUtils.toDouble(param[0]);
+				double y = NumberUtils.toDouble(param[1]);
+				double z = NumberUtils.toDouble(param[2]);
+				String[] degrees = Arrays.copyOfRange(param, 3, param.length);
+				P3D pt;
+
+				if (origin == null) {
+					origin = new P3D(x, y, z);
+					pt = P3D.ORIGIN;
+				} else {
+					pt = new P3D(x - origin.x, y - origin.y, z - origin.z);
+				}
+				loadDegrees(theta, degrees, null);
+				root.setPoint(pt);
+				motion.add(root);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
