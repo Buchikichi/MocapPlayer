@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,9 +26,9 @@ public final class MotionLoader {
 
 		for (int ix = 0; ix < 3 && ix < param.length; ix++) {
 			double deg = NumberUtils.toDouble(param[ix]);
-			double rad = deg * Math.PI / 180;
+			BigDecimal rad = BigDecimal.valueOf(deg * Math.PI / 180).setScale(3, BigDecimal.ROUND_HALF_UP);
 
-			values[ix] = Double.valueOf(rad);
+			values[ix] = Double.valueOf(rad.doubleValue());
 		}
 		if (dof == null) {
 			// root
@@ -62,7 +63,7 @@ public final class MotionLoader {
 	public List<Motion> load(final File file, Skeleton skeleton) {
 		List<Motion> list = new ArrayList<>();
 		Motion motion = null;
-		P3D origin = null;
+		P3D prev = null;
 
 		try (BufferedReader in = new BufferedReader(new FileReader(file))) {
 			for (;;) {
@@ -108,12 +109,12 @@ public final class MotionLoader {
 				String[] degrees = Arrays.copyOfRange(param, 3, param.length);
 				P3D pt;
 
-				if (origin == null) {
-					origin = new P3D(x, y, z);
+				if (prev == null) {
 					pt = P3D.ORIGIN;
 				} else {
-					pt = new P3D(x - origin.x, y - origin.y, z - origin.z);
+					pt = new P3D(x - prev.x, y - prev.y, z - prev.z);
 				}
+				prev = new P3D(x, y, z);
 				loadDegrees(theta, degrees, null);
 				root.setPoint(pt);
 				motion.add(root);

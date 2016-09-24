@@ -21,7 +21,31 @@ public final class MocapCanvas extends Canvas {
 	private final List<Motion> motionList = new ArrayList<>();
 	private double rotateH;
 	private double rotateV;
+	private int previous;
 	private int current;
+
+	private List<Motion> getCumulateList() {
+		List<Motion> list = new ArrayList<>();
+
+		if (this.motionList.isEmpty()) {
+			return list;
+		}
+		if (this.current == this.previous) {
+			return list;
+		}
+		int sign = this.current - this.previous < 0 ? -1 : 1;
+		int cur = this.previous;
+
+		for (;;) {
+			cur += sign;
+			list.add(this.motionList.get(cur));
+			if (cur == this.current) {
+				break;
+			}
+		}
+		this.previous = this.current;
+		return list;
+	}
 
 	/**
 	 * Get the Skeleton.
@@ -96,7 +120,8 @@ public final class MocapCanvas extends Canvas {
 		Graphics2D g2d = (Graphics2D) img.getGraphics();
 		int originX = size.width / 2;
 		int originY = size.height / 2 - size.height / 8;
-		Motion motion = null;
+		int sign = this.current - this.previous < 0 ? -1 : 1;
+		List<Motion> cumulateList = getCumulateList();
 
 		g2d.setBackground(Color.DARK_GRAY);
 		g2d.clearRect(0, 0, size.width, size.height);
@@ -105,16 +130,13 @@ public final class MocapCanvas extends Canvas {
 		g2d.drawString("V:" + String.valueOf(Math.floor(this.rotateV * 180 / Math.PI)), 0, 20);
 		g2d.drawString("H:" + String.valueOf(Math.floor(this.rotateH * 180 / Math.PI)), 0, 30);
 		g2d.translate(originX, originY);
-		if (!this.motionList.isEmpty()) {
-			motion = this.motionList.get(this.current);
-		}
 		for (Skeleton skeleton : this.skeletonList) {
 			skeleton.setRotateH(this.rotateH);
 			skeleton.setRotateV(this.rotateV);
-			skeleton.draw(g2d);
-			if (motion != null) {
-				skeleton.shift(motion);
+			for (Motion motion : cumulateList) {
+				skeleton.shift(motion, sign);
 			}
+			skeleton.draw(g2d);
 		}
 		g.drawImage(img, 0, 0, null);
 		g2d.dispose();

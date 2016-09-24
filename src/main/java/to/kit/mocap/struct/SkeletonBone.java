@@ -115,21 +115,27 @@ public final class SkeletonBone extends SkeletonNode {
 	}
 
 	@Override
-	public void draw(Graphics2D g) {
-		double s1 = 10;
-		double s2 = 10;
-		SkeletonNode parent = getParent();
+	protected void calculate() {
 		RealMatrix mat = getAccum();
 		P3D pt = P3D.ORIGIN.affine(mat);
 
 		setPoint(pt);
-		P3D nextPt = pt.rotate(getSkeleton().rotateV, getSkeleton().rotateH, 0);
-		int nextX = (int) (nextPt.x * s2);
-		int nextY = (int) (-nextPt.y * s2);
+		for (SkeletonNode node : getJoint()) {
+			node.calculate();
+		}
+	}
+
+	@Override
+	public void draw(Graphics2D g) {
+		double scale = 10;
+		SkeletonNode parent = getParent();
+		P3D nextPt = getPoint().rotate(getSkeleton().rotateV, getSkeleton().rotateH, 0);
+		int nextX = (int) (nextPt.x * scale);
+		int nextY = (int) (-nextPt.y * scale);
 
 		P3D prevPt = parent.getPoint().rotate(getSkeleton().rotateV, getSkeleton().rotateH, 0);
-		int prevX = (int) (prevPt.x * s1);
-		int prevY = (int) (-prevPt.y * s1);
+		int prevX = (int) (prevPt.x * scale);
+		int prevY = (int) (-prevPt.y * scale);
 
 //		String name = getName();
 //		String dofs = StringUtils.join(this.dof, ",");

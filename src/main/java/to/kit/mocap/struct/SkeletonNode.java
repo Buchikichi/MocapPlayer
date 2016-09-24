@@ -25,7 +25,8 @@ public abstract class SkeletonNode {
 	private P3D point = P3D.ORIGIN;
 	private Skeleton skeleton;
 
-	protected abstract void draw(Graphics2D g); 
+	protected abstract void calculate();
+	protected abstract void draw(Graphics2D g);
 
 	protected void add(SkeletonNode node) {
 		node.depth = this.depth + 1;

@@ -48,10 +48,13 @@ public final class Skeleton {
 		}
 	}
 
-	private void setRootPoint(MotionRoot motionRoot) {
+	private void setRootPoint(MotionRoot motionRoot, int direction) {
 		Rotation theta = motionRoot.getTheta();
+		P3D motn = motionRoot.getPoint();
+		P3D prev = this.root.getPoint();
+		P3D next = new P3D(prev.x + motn.x * direction, prev.y + motn.y * direction, prev.z + motn.z * direction);
 
-		this.root.setTranslate(motionRoot.getPoint());
+		this.root.setTranslate(next);
 		this.root.setThetaX(new Radian(theta.x));
 		this.root.setThetaY(new Radian(theta.y));
 		this.root.setThetaZ(new Radian(theta.z));
@@ -65,10 +68,10 @@ public final class Skeleton {
 		return this.nodeMap.get(name);
 	}
 
-	public void shift(Motion motion) {
+	public void shift(Motion motion, int direction) {
 		for (MotionBone motionBone : motion) {
 			if (motionBone instanceof MotionRoot) {
-				setRootPoint((MotionRoot) motionBone);
+				setRootPoint((MotionRoot) motionBone, direction);
 				continue;
 			}
 			String name = motionBone.getName();
@@ -79,12 +82,14 @@ public final class Skeleton {
 			bone.setThetaY(new Radian(theta.y));
 			bone.setThetaZ(new Radian(theta.z));
 		}
+		this.root.calculate();
 	}
 
 	public void draw(Graphics2D g) {
 		if (this.root == null) {
 			return;
 		}
+		this.root.calculate();
 		this.root.draw(g);
 	}
 	/**
