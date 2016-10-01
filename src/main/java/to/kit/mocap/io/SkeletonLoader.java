@@ -1,4 +1,4 @@
-package to.kit.mocap.struct;
+package to.kit.mocap.io;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -9,6 +9,13 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.math.NumberUtils;
+
+import to.kit.mocap.struct.Limit;
+import to.kit.mocap.struct.Rotation;
+import to.kit.mocap.struct.Skeleton;
+import to.kit.mocap.struct.SkeletonBone;
+import to.kit.mocap.struct.SkeletonNode;
+import to.kit.mocap.struct.SkeletonRoot;
 
 /**
  * SkeletonLoader.

@@ -5,6 +5,8 @@ import java.awt.Graphics2D;
 
 import org.apache.commons.math3.linear.RealMatrix;
 
+import net.arnx.jsonic.JSONHint;
+
 /**
  * Bone.
  * @author Hidetaka Sasai
@@ -38,67 +40,73 @@ public final class SkeletonBone extends SkeletonNode {
 	/**
 	 * @return the dir
 	 */
-	protected double[] getDir() {
+	@JSONHint(ignore = true)
+	public double[] getDir() {
 		return this.dir;
 	}
 	/**
 	 * @return the id
 	 */
-	protected int getId() {
+	@JSONHint(ignore = true)
+	public int getId() {
 		return this.id;
 	}
 	/**
 	 * @param value the id to set
 	 */
-	protected void setId(int value) {
+	public void setId(int value) {
 		this.id = value;
 	}
 	/**
 	 * @return the dof
 	 */
-	protected String[] getDof() {
+	@JSONHint(ignore = true)
+	public String[] getDof() {
 		return this.dof;
 	}
 	/**
 	 * @param dof the dof to set
 	 */
-	protected void setDof(String[] dof) {
+	public void setDof(String[] dof) {
 		this.dof = dof;
 	}
 	/**
 	 * @return the limitX
 	 */
-	protected Limit getLimitX() {
+	@JSONHint(ignore = true)
+	public Limit getLimitX() {
 		return this.limitX;
 	}
 	/**
 	 * @param limitX the limitX to set
 	 */
-	protected void setLimitX(Limit limitX) {
+	public void setLimitX(Limit limitX) {
 		this.limitX = limitX;
 	}
 	/**
 	 * @return the limitY
 	 */
-	protected Limit getLimitY() {
+	@JSONHint(ignore = true)
+	public Limit getLimitY() {
 		return this.limitY;
 	}
 	/**
 	 * @param limitY the limitY to set
 	 */
-	protected void setLimitY(Limit limitY) {
+	public void setLimitY(Limit limitY) {
 		this.limitY = limitY;
 	}
 	/**
 	 * @return the limitZ
 	 */
-	protected Limit getLimitZ() {
+	@JSONHint(ignore = true)
+	public Limit getLimitZ() {
 		return this.limitZ;
 	}
 	/**
 	 * @param limitZ the limitZ to set
 	 */
-	protected void setLimitZ(Limit limitZ) {
+	public void setLimitZ(Limit limitZ) {
 		this.limitZ = limitZ;
 	}
 	/**

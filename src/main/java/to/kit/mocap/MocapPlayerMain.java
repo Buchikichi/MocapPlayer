@@ -6,7 +6,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 import java.util.Timer;
@@ -24,12 +23,13 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import net.arnx.jsonic.JSON;
 import to.kit.mocap.component.MocapCanvas;
+import to.kit.mocap.io.MotionLoader;
+import to.kit.mocap.io.MotionWriter;
+import to.kit.mocap.io.SkeletonLoader;
+import to.kit.mocap.io.SkeletonWriter;
 import to.kit.mocap.struct.Motion;
-import to.kit.mocap.struct.MotionLoader;
 import to.kit.mocap.struct.Skeleton;
-import to.kit.mocap.struct.SkeletonLoader;
 
 /**
  * Motion Capture Data Player.
@@ -98,20 +98,17 @@ public class MocapPlayerMain extends JFrame {
 			return;
 		}
 		File file = this.chooser.getSelectedFile();
-		String asfJson = JSON.encode(skeleton);
 
-		try (FileWriter out = new FileWriter(file)) {
-			out.write(asfJson);
+		try (SkeletonWriter out = new SkeletonWriter(file)) {
+			out.write(skeleton);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		//
-		List<Motion> motionList = this.canvas.getMotionList();
 		File motionFile = new File(file.getParentFile(), "motion.json");
-		String motionJson = JSON.encode(motionList);
 
-		try (FileWriter out = new FileWriter(motionFile)) {
-			out.write(motionJson);
+		try (MotionWriter out = new MotionWriter(motionFile)) {
+			out.write(this.canvas.getMotionList());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

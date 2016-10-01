@@ -1,4 +1,4 @@
-package to.kit.mocap.struct;
+package to.kit.mocap.io;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -12,6 +12,14 @@ import java.util.List;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import to.kit.mocap.struct.Motion;
+import to.kit.mocap.struct.MotionBone;
+import to.kit.mocap.struct.MotionRoot;
+import to.kit.mocap.struct.P3D;
+import to.kit.mocap.struct.Rotation;
+import to.kit.mocap.struct.Skeleton;
+import to.kit.mocap.struct.SkeletonBone;
 
 /**
  * Motion loader.

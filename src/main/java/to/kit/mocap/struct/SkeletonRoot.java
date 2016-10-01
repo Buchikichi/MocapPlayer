@@ -82,11 +82,13 @@ public final class SkeletonRoot extends SkeletonNode {
 		this.orientation = orientation;
 	}
 
+	protected void calculateSimple() {
+		setPoint(P3D.ORIGIN.affine(getAccum()));
+	}
+
 	@Override
 	protected void calculate() {
-		P3D pt = P3D.ORIGIN.affine(getAccum());
-
-		setPoint(pt);
+		calculateSimple();
 		for (SkeletonNode node : getJoint()) {
 			node.calculate();
 		}

@@ -60,7 +60,7 @@ public final class Skeleton {
 		this.root.setThetaZ(new Radian(theta.z));
 	}
 
-	protected SkeletonNode getNode(String name) {
+	public SkeletonNode getNode(String name) {
 		if (!this.nodeMap.containsKey(name)) {
 			LOG.error("Bad parent name [{}].", name);
 			return null;
@@ -72,6 +72,9 @@ public final class Skeleton {
 		for (MotionBone motionBone : motion) {
 			if (motionBone instanceof MotionRoot) {
 				setRootPoint((MotionRoot) motionBone, direction);
+				if (motion.isReduction()) {
+					break;
+				}
 				continue;
 			}
 			String name = motionBone.getName();
@@ -82,9 +85,17 @@ public final class Skeleton {
 			bone.setThetaY(new Radian(theta.y));
 			bone.setThetaZ(new Radian(theta.z));
 		}
+		if (motion.isReduction()) {
+			this.root.calculateSimple();
+			return;
+		}
 		this.root.calculate();
 	}
 
+	/**
+	 * Draw.
+	 * @param g Graphics2D
+	 */
 	public void draw(Graphics2D g) {
 		if (this.root == null) {
 			return;
@@ -92,6 +103,7 @@ public final class Skeleton {
 		this.root.calculate();
 		this.root.draw(g);
 	}
+
 	/**
 	 * @return the root
 	 */

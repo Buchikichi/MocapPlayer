@@ -38,8 +38,12 @@ public final class MocapCanvas extends Canvas {
 
 		for (;;) {
 			cur += sign;
-			list.add(this.motionList.get(cur));
-			if (cur == this.current) {
+			boolean isCurrent = cur == this.current;
+			Motion motion = this.motionList.get(cur);
+
+			motion.setReduction(!isCurrent);
+			list.add(motion);
+			if (isCurrent) {
 				break;
 			}
 		}
