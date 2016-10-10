@@ -18,6 +18,7 @@ import to.kit.mocap.struct.MotionRoot;
 import to.kit.mocap.struct.P3D;
 import to.kit.mocap.struct.Rotation;
 import to.kit.mocap.struct.Skeleton;
+import to.kit.mocap.struct.Skeleton.CalcOrder;
 import to.kit.mocap.struct.SkeletonBone;
 import to.kit.mocap.struct.SkeletonNode;
 import to.kit.mocap.struct.SkeletonRoot;
@@ -45,15 +46,16 @@ public final class BvhLoader implements Loader {
 		rotation.x = Double.valueOf(rx * Math.PI / 180);
 		rotation.y = Double.valueOf(ry * Math.PI / 180);
 		rotation.z = Double.valueOf(rz * Math.PI / 180);
+		rotation.setOrder("yxz");
 	}
 
 	private void processMotion(String mnemonic, String[] elements) {
 		if ("Frames:".equals(mnemonic)) {
-			System.out.println("Frames:" + elements[1]);
+//			System.out.println("Frames:" + elements[1]);
 			return;
 		}
 		if ("Frame".equals(mnemonic)) {
-			System.out.println("Frame Time:" + elements[2]);
+//			System.out.println("Frame Time:" + elements[2]);
 			return;
 		}
 		Motion motion = new Motion();
@@ -123,8 +125,6 @@ public final class BvhLoader implements Loader {
 
 			this.currentNode = new SkeletonBone();
 			this.currentNode.setName(name);
-//			this.skeleton.add(this.currentNode);
-//			this.skeleton.addHierarchy(parent, name);
 		} else if ("OFFSET".equals(mnemonic) && this.currentNode != null) {
 			double x = NumberUtils.toDouble(param[0]);
 			double y = NumberUtils.toDouble(param[1]);
@@ -145,10 +145,8 @@ public final class BvhLoader implements Loader {
 			this.channels += NumberUtils.toInt(param[0]);
 		} else if ("{".equals(mnemonic)) {
 			this.queue.add(this.currentNode.getName());
-//			System.out.println("add:" + StringUtils.join(this.queue, ","));
 		} else if ("}".equals(mnemonic)) {
 			this.queue.pollLast();
-//			System.out.println("poll:" + StringUtils.join(this.queue, ","));
 		}
 	}
 
@@ -156,6 +154,8 @@ public final class BvhLoader implements Loader {
 	public void load(File file) {
 		Phase phase = null;
 
+		this.skeleton.setName(file.getName());
+		this.skeleton.setCalcOrder(CalcOrder.TranslateRotate);
 		try (BufferedReader in = new BufferedReader(new FileReader(file))) {
 			for (;;) {
 				String line = in.readLine();
@@ -173,7 +173,7 @@ public final class BvhLoader implements Loader {
 				}
 				if (Phase.MOTION.toString().equals(mnemonic)) {
 					adjustDirection(this.skeleton.getRoot());
-					System.out.println("channels:" + this.channels);
+//					System.out.println("channels:" + this.channels);
 					phase = Phase.MOTION;
 					continue;
 				}

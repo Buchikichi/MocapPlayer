@@ -1,6 +1,7 @@
 package to.kit.mocap;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
@@ -29,6 +30,7 @@ import to.kit.mocap.io.LoaderFactory;
 import to.kit.mocap.io.MotionLoader;
 import to.kit.mocap.io.MotionWriter;
 import to.kit.mocap.io.SkeletonWriter;
+import to.kit.mocap.struct.Anima;
 import to.kit.mocap.struct.Motion;
 import to.kit.mocap.struct.Skeleton;
 
@@ -39,11 +41,15 @@ import to.kit.mocap.struct.Skeleton;
 public class MocapPlayerMain extends JFrame {
 	private static final int FRAME_WIDTH = 1600;
 	private static final int FRAME_HEIGHT = 1024;
+	private static final Color[] COLORS = {Color.PINK, Color.ORANGE, Color.CYAN, Color.LIGHT_GRAY, Color.WHITE};
 	final MocapCanvas canvas = new MocapCanvas();
 	final JSlider sliderH = new JSlider();
 	final JSlider sliderV = new JSlider();
 	final JSlider slider = new JSlider();
 	private JFileChooser chooser = new JFileChooser();
+
+	private Anima currentAnima;
+	private int colorNum = 0;
 
 	private void load(File file) {
 		String name = file.getName().toLowerCase();
@@ -53,24 +59,33 @@ public class MocapPlayerMain extends JFrame {
 			return;
 		}
 		if (loader instanceof MotionLoader) {
-			Skeleton skeleton = this.canvas.getSkeleton();
-
-			((MotionLoader)loader).setSkeleton(skeleton);
+			if (this.currentAnima != null) {
+				((MotionLoader)loader).setSkeleton(this.currentAnima.getSkeleton());
+			}
 		}
 		loader.load(file);
 		Skeleton skeleton = loader.getSkeleton();
-		List<Motion> motionList = loader.getMotionList();
 
 		if (skeleton != null) {
-			this.canvas.add(skeleton);
-			this.canvas.repaint();
+			skeleton.setColor(COLORS[this.colorNum]);
+			this.colorNum = (++this.colorNum) % COLORS.length;
+			this.currentAnima = new Anima(skeleton);
+			this.canvas.add(this.currentAnima);
 		}
+		List<Motion> motionList = loader.getMotionList();
 		if (motionList != null) {
-			this.canvas.set(motionList);
-			this.slider.setMinimum(0);
-			this.slider.setMaximum(motionList.size() - 1);
-			this.slider.setValue(0);
-			this.slider.setEnabled(true);
+			if (this.currentAnima != null) {
+				int motionMax = motionList.size() - 1;
+				int currentMax = this.slider.getMaximum();
+
+				this.currentAnima.addMotion(motionList);
+				this.slider.setMinimum(0);
+				this.slider.setValue(0);
+				if (currentMax < motionMax) {
+					this.slider.setMaximum(motionMax);
+				}
+				this.slider.setEnabled(true);
+			}
 		}
 	}
 
@@ -86,9 +101,7 @@ public class MocapPlayerMain extends JFrame {
 	}
 
 	protected void saveFile() {
-		Skeleton skeleton = this.canvas.getSkeleton();
-
-		if (skeleton == null) {
+		if (this.currentAnima == null) {
 			return;
 		}
 		int res = this.chooser.showSaveDialog(this);
@@ -96,6 +109,7 @@ public class MocapPlayerMain extends JFrame {
 		if (res != JFileChooser.APPROVE_OPTION) {
 			return;
 		}
+		Skeleton skeleton = this.currentAnima.getSkeleton();
 		File file = this.chooser.getSelectedFile();
 
 		try (SkeletonWriter out = new SkeletonWriter(file)) {
@@ -107,7 +121,7 @@ public class MocapPlayerMain extends JFrame {
 		File motionFile = new File(file.getParentFile(), "motion.json");
 
 		try (MotionWriter out = new MotionWriter(motionFile)) {
-			out.write(this.canvas.getMotionList());
+			out.write(this.currentAnima.getMotionList());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -169,7 +183,7 @@ public class MocapPlayerMain extends JFrame {
 				MocapCanvas cv = MocapPlayerMain.this.canvas;
 
 				cv.removeTheFront();
-				MocapPlayerMain.this.slider.setMaximum(cv.getMotionList().size() - 1);
+//				MocapPlayerMain.this.slider.setMaximum(cv.getMotionList().size() - 1);
 				MocapPlayerMain.this.slider.setValue(0);
 			}
 		});
@@ -180,9 +194,9 @@ public class MocapPlayerMain extends JFrame {
 				MocapCanvas cv = MocapPlayerMain.this.canvas;
 
 				cv.removeTheRear();
-				int max = cv.getMotionList().size() - 1;
-				MocapPlayerMain.this.slider.setMaximum(max);
-				MocapPlayerMain.this.slider.setValue(max);
+//				int max = cv.getMotionList().size() - 1;
+//				MocapPlayerMain.this.slider.setMaximum(max);
+//				MocapPlayerMain.this.slider.setValue(max);
 			}
 		});
 		mnEdit.add(mntmRmoveTheRear);

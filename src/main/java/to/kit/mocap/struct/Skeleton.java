@@ -1,5 +1,6 @@
 package to.kit.mocap.struct;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +16,10 @@ public final class Skeleton {
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(Skeleton.class);
 
+	private String name;
 	private SkeletonRoot root;
+	private Color color = Color.LIGHT_GRAY;
+	private CalcOrder calcOrder = CalcOrder.RotateTranslate;
 	private Map<String, SkeletonNode> nodeMap = new HashMap<>();
 	double rotateH;
 	double rotateV;
@@ -55,9 +59,7 @@ public final class Skeleton {
 		P3D next = new P3D(prev.x + motn.x * direction, prev.y + motn.y * direction, prev.z + motn.z * direction);
 
 		this.root.setTranslate(next);
-		this.root.setThetaX(new Radian(theta.x));
-		this.root.setThetaY(new Radian(theta.y));
-		this.root.setThetaZ(new Radian(theta.z));
+		this.root.setThetaMatrix(theta.getMatrix());
 	}
 
 	public SkeletonNode getNode(String name) {
@@ -77,13 +79,10 @@ public final class Skeleton {
 				}
 				continue;
 			}
-			String name = motionBone.getName();
-			SkeletonBone bone = (SkeletonBone) getNode(name);
+			SkeletonBone bone = (SkeletonBone) getNode(motionBone.getName());
 			Rotation theta = motionBone.getTheta();
 
-			bone.setThetaX(new Radian(theta.x));
-			bone.setThetaY(new Radian(theta.y));
-			bone.setThetaZ(new Radian(theta.z));
+			bone.setThetaMatrix(theta.getMatrix());
 		}
 		if (motion.isReduction()) {
 			this.root.calculateSimple();
@@ -101,9 +100,31 @@ public final class Skeleton {
 			return;
 		}
 		this.root.calculate();
+		if (this.name != null) {
+			double scale = 10;
+			P3D pt = this.root.getPoint();
+			P3D nextPt = pt.rotate(this.rotateV, this.rotateH, 0);
+			int x = (int) (nextPt.x * scale);
+			int y = (int) (-nextPt.y * scale);
+
+			g.setColor(Color.GRAY);
+			g.drawString(this.name, x, y);
+		}
 		this.root.draw(g);
 	}
 
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return this.name;
+	}
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
 	/**
 	 * @return the root
 	 */
@@ -117,6 +138,30 @@ public final class Skeleton {
 		this.root = root;
 	}
 	/**
+	 * @return the color
+	 */
+	public Color getColor() {
+		return this.color;
+	}
+	/**
+	 * @param color the color to set
+	 */
+	public void setColor(Color color) {
+		this.color = color;
+	}
+	/**
+	 * @return the calcOrder
+	 */
+	public CalcOrder getCalcOrder() {
+		return this.calcOrder;
+	}
+	/**
+	 * @param calcOrder the calcOrder to set
+	 */
+	public void setCalcOrder(CalcOrder calcOrder) {
+		this.calcOrder = calcOrder;
+	}
+	/**
 	 * @param rad the rotateH to set
 	 */
 	public void setRotateH(double rad) {
@@ -127,5 +172,10 @@ public final class Skeleton {
 	 */
 	public void setRotateV(double rad) {
 		this.rotateV = rad;
+	}
+
+	public enum CalcOrder {
+		RotateTranslate,
+		TranslateRotate,
 	}
 }

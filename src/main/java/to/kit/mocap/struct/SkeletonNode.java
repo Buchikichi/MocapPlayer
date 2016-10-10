@@ -7,6 +7,8 @@ import java.util.List;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 
+import to.kit.mocap.struct.Skeleton.CalcOrder;
+
 /**
  * Node.
  * @author Hidetaka Sasai
@@ -17,10 +19,8 @@ public abstract class SkeletonNode {
 	private SkeletonNode parent;
 	private List<SkeletonNode> joint = new ArrayList<>();
 	private final Rotation axis = new Rotation();
-	protected RealMatrix axisMatrix = this.axis.getMatrix();
-	protected Radian thetaX = new Radian(null);
-	protected Radian thetaY = new Radian(null);
-	protected Radian thetaZ = new Radian(null);
+	protected RealMatrix axisMatrix = Radian.NO_EFFECT;
+	protected RealMatrix thetaMatrix = Radian.NO_EFFECT;
 	protected P3D translate = P3D.ORIGIN;
 	private P3D point = P3D.ORIGIN;
 	private Skeleton skeleton;
@@ -47,20 +47,16 @@ public abstract class SkeletonNode {
 		});
 	}
 
-	protected RealMatrix getThetaMatrix() {
-		RealMatrix mx = this.thetaX.rotateX();
-		RealMatrix my = this.thetaY.rotateY();
-		RealMatrix mz = this.thetaZ.rotateZ();
-
-		return mz.multiply(my).multiply(mx);
-//		return my.multiply(mx).multiply(mz);
-	}
-
 	protected RealMatrix getAccum() {
 		RealMatrix tm = getThetaMatrix();
 		RealMatrix tr = getTranslateMatrix();
-		RealMatrix mat = getAxisMatrix().multiply(tm).multiply(tr);
+		RealMatrix mat;
 
+		if (this.skeleton.getCalcOrder() == CalcOrder.RotateTranslate) {
+			mat = getAxisMatrix().multiply(tm).multiply(tr);
+		} else {
+			mat = getAxisMatrix().multiply(tr).multiply(tm);
+		}
 		return this.parent.getAccum().multiply(mat);
 	}
 
@@ -82,41 +78,18 @@ public abstract class SkeletonNode {
 	protected void setAxisMatrix(RealMatrix axisMatrix) {
 		this.axisMatrix = axisMatrix;
 	}
+	
 	/**
-	 * @return the tX
+	 * @return the thetaMatrix
 	 */
-	protected Radian getThetaX() {
-		return this.thetaX;
+	protected RealMatrix getThetaMatrix() {
+		return this.thetaMatrix;
 	}
 	/**
-	 * @param tX the tX to set
+	 * @param thetaMatrix the thetaMatrix to set
 	 */
-	protected void setThetaX(Radian tX) {
-		this.thetaX = tX;
-	}
-	/**
-	 * @return the tY
-	 */
-	protected Radian getThetaY() {
-		return this.thetaY;
-	}
-	/**
-	 * @param tY the tY to set
-	 */
-	protected void setThetaY(Radian tY) {
-		this.thetaY = tY;
-	}
-	/**
-	 * @return the tZ
-	 */
-	protected Radian getThetaZ() {
-		return this.thetaZ;
-	}
-	/**
-	 * @param tZ the tZ to set
-	 */
-	protected void setThetaZ(Radian tZ) {
-		this.thetaZ = tZ;
+	protected void setThetaMatrix(RealMatrix thetaMatrix) {
+		this.thetaMatrix = thetaMatrix;
 	}
 	/**
 	 * @return the point

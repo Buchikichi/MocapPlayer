@@ -136,6 +136,7 @@ public final class SkeletonBone extends SkeletonNode {
 	@Override
 	public void draw(Graphics2D g) {
 		double scale = 10;
+		Skeleton skeleton = getSkeleton();
 		SkeletonNode parent = getParent();
 		P3D nextPt = getPoint().rotate(getSkeleton().rotateV, getSkeleton().rotateH, 0);
 		int nextX = (int) (nextPt.x * scale);
@@ -152,7 +153,7 @@ public final class SkeletonBone extends SkeletonNode {
 //		if (name.startsWith("l")) {
 //			g.drawString(info + name, prevX + 10 * (depth - 1), prevY + 10);
 //		}
-		g.setColor(Color.LIGHT_GRAY);
+		g.setColor(skeleton.getColor());
 		g.drawRoundRect(nextX, nextY, 3, 3, 3, 3);
 		g.drawLine(prevX, prevY, nextX, nextY);
 		for (SkeletonNode node : getJoint()) {

@@ -4,7 +4,7 @@ import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 
 public final class Radian {
-	private static final RealMatrix NO_EFFECT =
+	public static final RealMatrix NO_EFFECT =
 			MatrixUtils.createRealMatrix(new double[][] { { 1, 0, 0, 0 }, { 0, 1, 0, 0 }, { 0, 0, 1, 0 }, { 0, 0, 0, 1 } });
 	private Double radian;
 
