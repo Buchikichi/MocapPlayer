@@ -24,9 +24,10 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import to.kit.mocap.component.MocapCanvas;
+import to.kit.mocap.io.Loader;
+import to.kit.mocap.io.LoaderFactory;
 import to.kit.mocap.io.MotionLoader;
 import to.kit.mocap.io.MotionWriter;
-import to.kit.mocap.io.SkeletonLoader;
 import to.kit.mocap.io.SkeletonWriter;
 import to.kit.mocap.struct.Motion;
 import to.kit.mocap.struct.Skeleton;
@@ -44,30 +45,33 @@ public class MocapPlayerMain extends JFrame {
 	final JSlider slider = new JSlider();
 	private JFileChooser chooser = new JFileChooser();
 
-	private void loadSkeleton(File file) {
-		SkeletonLoader loader = new SkeletonLoader();
-		Skeleton skeleton = loader.load(file);
+	private void load(File file) {
+		String name = file.getName().toLowerCase();
+		Loader loader = new LoaderFactory().create(name);
+
+		if (loader == null) {
+			return;
+		}
+		if (loader instanceof MotionLoader) {
+			Skeleton skeleton = this.canvas.getSkeleton();
+
+			((MotionLoader)loader).setSkeleton(skeleton);
+		}
+		loader.load(file);
+		Skeleton skeleton = loader.getSkeleton();
+		List<Motion> motionList = loader.getMotionList();
 
 		if (skeleton != null) {
 			this.canvas.add(skeleton);
 			this.canvas.repaint();
 		}
-	}
-
-	private void loadMotion(File file) {
-		Skeleton skeleton = this.canvas.getSkeleton();
-
-		if (skeleton == null) {
-			return;
+		if (motionList != null) {
+			this.canvas.set(motionList);
+			this.slider.setMinimum(0);
+			this.slider.setMaximum(motionList.size() - 1);
+			this.slider.setValue(0);
+			this.slider.setEnabled(true);
 		}
-		MotionLoader loader = new MotionLoader();
-		List<Motion> motionList = loader.load(file, skeleton);
-
-		this.canvas.set(motionList);
-		this.slider.setMinimum(0);
-		this.slider.setMaximum(motionList.size() - 1);
-		this.slider.setValue(0);
-		this.slider.setEnabled(true);
 	}
 
 	protected void openFile() {
@@ -77,13 +81,8 @@ public class MocapPlayerMain extends JFrame {
 			return;
 		}
 		File file = this.chooser.getSelectedFile();
-		String name = file.getName().toLowerCase();
 
-		if (name.endsWith(".asf")) {
-			loadSkeleton(file);
-		} else if (name.endsWith(".amc")) {
-			loadMotion(file);
-		}
+		load(file);
 	}
 
 	protected void saveFile() {

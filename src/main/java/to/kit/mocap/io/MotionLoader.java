@@ -25,9 +25,11 @@ import to.kit.mocap.struct.SkeletonBone;
  * Motion loader.
  * @author Hidetaka Sasai
  */
-public final class MotionLoader {
+public final class MotionLoader implements Loader {
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(MotionLoader.class);
+	private Skeleton skeleton;
+	private List<Motion> motionList = new ArrayList<>();
 
 	private void loadDegrees(Rotation theta, String[] param, String[] dof) {
 		Double[] values = new Double[3];
@@ -65,11 +67,9 @@ public final class MotionLoader {
 	/**
 	 * Load a motion file.
 	 * @param file AMC
-	 * @param skeleton 
-	 * @return motion list
 	 */
-	public List<Motion> load(final File file, Skeleton skeleton) {
-		List<Motion> list = new ArrayList<>();
+	@Override
+	public void load(final File file) {
 		Motion motion = null;
 		P3D prev = null;
 
@@ -94,7 +94,7 @@ public final class MotionLoader {
 
 				if (id.matches("[0-9]+")) {
 					motion = new Motion();
-					list.add(motion);
+					this.motionList.add(motion);
 					continue;
 				}
 				if (motion == null) {
@@ -130,6 +130,27 @@ public final class MotionLoader {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return list;
+	}
+
+	@Override
+	public boolean isAcceptable(String filename) {
+		return filename.endsWith(".amc");
+	}
+
+	@Override
+	public Skeleton getSkeleton() {
+		return null;
+	}
+
+	/**
+	 * @param skeleton the skeleton to set
+	 */
+	public void setSkeleton(Skeleton skeleton) {
+		this.skeleton = skeleton;
+	}
+
+	@Override
+	public List<Motion> getMotionList() {
+		return this.motionList;
 	}
 }

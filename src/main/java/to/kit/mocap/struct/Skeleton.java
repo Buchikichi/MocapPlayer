@@ -30,7 +30,7 @@ public final class Skeleton {
 		this.nodeMap.put(name, node);
 	}
 
-	public void addHierarchy(String parent, String[] children) {
+	public void addHierarchy(String parent, String... children) {
 		if (!this.nodeMap.containsKey(parent)) {
 			LOG.error("Bad parent name [{}].", parent);
 			return;

@@ -17,7 +17,7 @@ public abstract class SkeletonNode {
 	private SkeletonNode parent;
 	private List<SkeletonNode> joint = new ArrayList<>();
 	private final Rotation axis = new Rotation();
-	protected RealMatrix axisMatrix;
+	protected RealMatrix axisMatrix = this.axis.getMatrix();
 	protected Radian thetaX = new Radian(null);
 	protected Radian thetaY = new Radian(null);
 	protected Radian thetaZ = new Radian(null);
@@ -53,6 +53,7 @@ public abstract class SkeletonNode {
 		RealMatrix mz = this.thetaZ.rotateZ();
 
 		return mz.multiply(my).multiply(mx);
+//		return my.multiply(mx).multiply(mz);
 	}
 
 	protected RealMatrix getAccum() {
@@ -68,12 +69,6 @@ public abstract class SkeletonNode {
 	 */
 	protected int getDepth() {
 		return this.depth;
-	}
-	/**
-	 * @return the parent
-	 */
-	protected SkeletonNode getParent() {
-		return this.parent;
 	}
 	/**
 	 * @return the axisMatrix
@@ -148,6 +143,12 @@ public abstract class SkeletonNode {
 		this.skeleton = skeleton;
 	}
 
+	/**
+	 * @return the parent
+	 */
+	public SkeletonNode getParent() {
+		return this.parent;
+	}
 	/**
 	 * @return the axis
 	 */

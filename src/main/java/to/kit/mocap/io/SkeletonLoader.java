@@ -11,6 +11,7 @@ import java.util.List;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import to.kit.mocap.struct.Limit;
+import to.kit.mocap.struct.Motion;
 import to.kit.mocap.struct.Rotation;
 import to.kit.mocap.struct.Skeleton;
 import to.kit.mocap.struct.SkeletonBone;
@@ -21,7 +22,8 @@ import to.kit.mocap.struct.SkeletonRoot;
  * SkeletonLoader.
  * @author Hidetaka Sasai
  */
-public final class SkeletonLoader {
+public final class SkeletonLoader implements Loader {
+	private Skeleton skeleton = new Skeleton();
 	private String section;
 	private String segment;
 	private SkeletonRoot root;
@@ -49,10 +51,10 @@ public final class SkeletonLoader {
 		this.root.setPosition(position);
 	}
 
-	private void processRoot(Skeleton skeleton, String[] param) {
+	private void processRoot(String[] param) {
 		if (this.root == null) {
 			this.root = new SkeletonRoot("root");
-			skeleton.add(this.root);
+			this.skeleton.add(this.root);
 		}
 		if ("axis".equals(this.segment)) {
 			this.root.setAxisOrder(param[0]);
@@ -126,11 +128,11 @@ public final class SkeletonLoader {
 		}
 	}
 
-	private void processBonedata(Skeleton skeleton, String[] param) {
+	private void processBonedata(String[] param) {
 		if ("begin".equals(this.segment)) {
 			this.bone = new SkeletonBone();
 		} else if ("end".equals(this.segment)) {
-			skeleton.add(this.bone);
+			this.skeleton.add(this.bone);
 			this.bone = null;
 		}
 		if (this.bone == null) {
@@ -157,11 +159,9 @@ public final class SkeletonLoader {
 	/**
 	 * Load ASF file.
 	 * @param file ASF file
-	 * @return Skeleton
 	 */
-	public Skeleton load(File file) {
-		Skeleton skeleton = new Skeleton();
-
+	@Override
+	public void load(File file) {
 		try (BufferedReader in = new BufferedReader(new FileReader(file))) {
 			for (;;) {
 				String line = in.readLine();
@@ -186,12 +186,12 @@ public final class SkeletonLoader {
 					this.cnt = 0;
 				}
 				if ("root".equals(this.section)) {
-					processRoot(skeleton, param);
+					processRoot(param);
 				} else if ("bonedata".equals(this.section)) {
-					processBonedata(skeleton, param);
+					processBonedata(param);
 				} else if ("hierarchy".equals(this.section)) {
 					if (!"begin".equals(seg) && !"end".equals(seg)) {
-						skeleton.addHierarchy(seg, param);
+						this.skeleton.addHierarchy(seg, param);
 					}
 				}
 				this.cnt++;
@@ -200,6 +200,20 @@ public final class SkeletonLoader {
 			e.printStackTrace();
 		}
 		adjustDirection(this.root);
-		return skeleton;
+	}
+
+	@Override
+	public boolean isAcceptable(String filename) {
+		return filename.endsWith(".asf");
+	}
+
+	@Override
+	public Skeleton getSkeleton() {
+		return this.skeleton;
+	}
+
+	@Override
+	public List<Motion> getMotionList() {
+		return null;
 	}
 }
