@@ -1,6 +1,5 @@
 package to.kit.mocap.struct;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 
 import org.apache.commons.math3.linear.RealMatrix;
@@ -135,10 +134,10 @@ public final class SkeletonBone extends SkeletonNode {
 
 	@Override
 	public void draw(Graphics2D g) {
-		double scale = 10;
 		Skeleton skeleton = getSkeleton();
 		SkeletonNode parent = getParent();
 		P3D nextPt = getPoint().rotate(getSkeleton().rotateV, getSkeleton().rotateH, 0);
+		double scale = skeleton.getScale();
 		int nextX = (int) (nextPt.x * scale);
 		int nextY = (int) (-nextPt.y * scale);
 
@@ -147,11 +146,9 @@ public final class SkeletonBone extends SkeletonNode {
 		int prevY = (int) (-prevPt.y * scale);
 
 //		String name = getName();
-//		String dofs = StringUtils.join(this.dof, ",");
-//		String info = dofs + String.format("[%3.2f,%3.2f,%3.2f]", this.thetaX.toDegree(), this.thetaY.toDegree(), this.thetaZ.toDegree());
-//		g.setColor(Color.GRAY);
-//		if (name.startsWith("l")) {
-//			g.drawString(info + name, prevX + 10 * (depth - 1), prevY + 10);
+//		if (name.startsWith("L")) {
+//			g.setColor(Color.GRAY);
+//			g.drawString(name, prevX + 5 * (getDepth() - 1), prevY + 10);
 //		}
 		g.setColor(skeleton.getColor());
 		g.drawRoundRect(nextX, nextY, 3, 3, 3, 3);

@@ -9,7 +9,6 @@ import org.apache.commons.math3.linear.RealMatrix;
  * @author Hidetaka Sasai
  */
 public final class SkeletonRoot extends SkeletonNode {
-	private String order;
 	private String axisOrder;
 	private double[] position;
 	private String orientation;
@@ -30,18 +29,6 @@ public final class SkeletonRoot extends SkeletonNode {
 		setName(name);
 	}
 
-	/**
-	 * @return the order
-	 */
-	public String getOrder() {
-		return this.order;
-	}
-	/**
-	 * @param order the order to set
-	 */
-	public void setOrder(String order) {
-		this.order = order;
-	}
 	/**
 	 * @return the axis
 	 */

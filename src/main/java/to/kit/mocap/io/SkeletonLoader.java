@@ -162,6 +162,7 @@ public final class SkeletonLoader implements Loader {
 	 */
 	@Override
 	public void load(File file) {
+		this.skeleton.setScale(10);
 		try (BufferedReader in = new BufferedReader(new FileReader(file))) {
 			for (;;) {
 				String line = in.readLine();

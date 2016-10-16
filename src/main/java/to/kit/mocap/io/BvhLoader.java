@@ -63,9 +63,9 @@ public final class BvhLoader implements Loader {
 
 		for (String name : this.nameList) {
 			if (ix == 0) {
-				double x = NumberUtils.toDouble(elements[ix]) * .3;
-				double y = NumberUtils.toDouble(elements[ix + 1]) * .3;
-				double z = NumberUtils.toDouble(elements[ix + 2]) * .3;
+				double x = NumberUtils.toDouble(elements[ix]);
+				double y = NumberUtils.toDouble(elements[ix + 1]);
+				double z = NumberUtils.toDouble(elements[ix + 2]);
 				String[] param = Arrays.copyOfRange(elements, ix + 3, ix + 6);
 				MotionRoot motionRoot = new MotionRoot(name);
 				P3D pt;
@@ -81,11 +81,13 @@ public final class BvhLoader implements Loader {
 				motion.add(motionRoot);
 				ix += 3;
 			} else {
-				String[] param = Arrays.copyOfRange(elements, ix, ix + 3);
-				MotionBone motionBone = new MotionBone(name);
-
-				precessRotation(motionBone, param);
-				motion.add(motionBone);
+				if (ix + 3 <= elements.length) {
+					String[] param = Arrays.copyOfRange(elements, ix, ix + 3);
+					MotionBone motionBone = new MotionBone(name);
+	
+					precessRotation(motionBone, param);
+					motion.add(motionBone);
+				}
 			}
 			ix += 3;
 		}
@@ -139,9 +141,17 @@ public final class BvhLoader implements Loader {
 				dir[0] = x;
 				dir[1] = y;
 				dir[2] = z;
-				bone.setLength(.3);
+				bone.setLength(1);
 			}
 		} else if ("CHANNELS".equals(mnemonic)) {
+			String order;
+
+			if (this.currentNode instanceof SkeletonRoot) {
+				order = param[4].substring(0, 1) + param[5].substring(0, 1) + param[6].substring(0, 1);
+			} else {
+				order = param[1].substring(0, 1) + param[2].substring(0, 1) + param[3].substring(0, 1);
+			}
+			this.currentNode.setOrder(order.toLowerCase());
 			this.channels += NumberUtils.toInt(param[0]);
 		} else if ("{".equals(mnemonic)) {
 			this.queue.add(this.currentNode.getName());
@@ -156,6 +166,8 @@ public final class BvhLoader implements Loader {
 
 		this.skeleton.setName(file.getName());
 		this.skeleton.setCalcOrder(CalcOrder.TranslateRotate);
+		this.skeleton.setScale(2);
+		this.motionList.clear();
 		try (BufferedReader in = new BufferedReader(new FileReader(file))) {
 			for (;;) {
 				String line = in.readLine();

@@ -103,7 +103,7 @@ public final class MotionLoader implements Loader {
 				if (!"root".equals(id)) {
 					MotionBone motionBone = new MotionBone(id);
 					Rotation theta = motionBone.getTheta();
-					SkeletonBone bone = (SkeletonBone) skeleton.getNode(id);
+					SkeletonBone bone = (SkeletonBone) this.skeleton.getNode(id);
 
 					loadDegrees(theta, param, bone.getDof());
 					motion.add(motionBone);

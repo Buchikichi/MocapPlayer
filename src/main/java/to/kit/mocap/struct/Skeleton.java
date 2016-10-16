@@ -8,6 +8,8 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import net.arnx.jsonic.JSONHint;
+
 /**
  * Skeleton.
  * @author Hidetaka Sasai
@@ -20,18 +22,19 @@ public final class Skeleton {
 	private SkeletonRoot root;
 	private Color color = Color.LIGHT_GRAY;
 	private CalcOrder calcOrder = CalcOrder.RotateTranslate;
+	private double scale = 1;
 	private Map<String, SkeletonNode> nodeMap = new HashMap<>();
 	double rotateH;
 	double rotateV;
 
 	public void add(SkeletonNode node) {
-		String name = node.getName();
+		String nodeName = node.getName();
 
 		node.setSkeleton(this);
 		if (node instanceof SkeletonRoot) {
 			this.root = (SkeletonRoot) node;
 		}
-		this.nodeMap.put(name, node);
+		this.nodeMap.put(nodeName, node);
 	}
 
 	public void addHierarchy(String parent, String... children) {
@@ -74,15 +77,15 @@ public final class Skeleton {
 		for (MotionBone motionBone : motion) {
 			if (motionBone instanceof MotionRoot) {
 				setRootPoint((MotionRoot) motionBone, direction);
-				if (motion.isReduction()) {
-					break;
-				}
 				continue;
 			}
 			SkeletonBone bone = (SkeletonBone) getNode(motionBone.getName());
 			Rotation theta = motionBone.getTheta();
 
 			bone.setThetaMatrix(theta.getMatrix());
+			if (motion.isReduction()) {
+				break;
+			}
 		}
 		if (motion.isReduction()) {
 			this.root.calculateSimple();
@@ -101,11 +104,10 @@ public final class Skeleton {
 		}
 		this.root.calculate();
 		if (this.name != null) {
-			double scale = 10;
 			P3D pt = this.root.getPoint();
 			P3D nextPt = pt.rotate(this.rotateV, this.rotateH, 0);
-			int x = (int) (nextPt.x * scale);
-			int y = (int) (-nextPt.y * scale);
+			int x = (int) (nextPt.x * this.scale);
+			int y = (int) (-nextPt.y * this.scale);
 
 			g.setColor(Color.GRAY);
 			g.drawString(this.name, x, y);
@@ -140,6 +142,7 @@ public final class Skeleton {
 	/**
 	 * @return the color
 	 */
+	@JSONHint(ignore = true)
 	public Color getColor() {
 		return this.color;
 	}
@@ -160,6 +163,18 @@ public final class Skeleton {
 	 */
 	public void setCalcOrder(CalcOrder calcOrder) {
 		this.calcOrder = calcOrder;
+	}
+	/**
+	 * @return the scale
+	 */
+	public double getScale() {
+		return this.scale;
+	}
+	/**
+	 * @param scale the scale to set
+	 */
+	public void setScale(double scale) {
+		this.scale = scale;
 	}
 	/**
 	 * @param rad the rotateH to set

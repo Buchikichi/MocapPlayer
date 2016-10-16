@@ -29,7 +29,6 @@ public final class MocapCanvas extends Canvas {
 		synchronized (this.animaList) {
 			this.animaList.add(anima);
 		}
-		repaint();
 	}
 	/**
 	 * Remove the front motion.
@@ -62,12 +61,13 @@ public final class MocapCanvas extends Canvas {
 		this.rotateV = value;
 	}
 	/**
-	 * @param current the current to set
+	 * @param value the current to set
 	 */
-	public void setCurrent(int current) {
+	public void setCurrent(int value) {
 		for (Anima anima : this.animaList) {
-			anima.setCurrent(current);
+			anima.setCurrent(value);
 		}
+		this.current = value;
 	}
 
 	@Override

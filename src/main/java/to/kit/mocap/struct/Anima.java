@@ -4,6 +4,8 @@ import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.arnx.jsonic.JSONHint;
+
 /**
  * Anima.
  * @author Hidetaka Sasai
@@ -25,19 +27,56 @@ public final class Anima {
 		}
 		int sign = this.current - this.previous < 0 ? -1 : 1;
 		int cur = this.previous;
+		Motion motion = null;
 
-		for (;;) {
-			cur += sign;
-			boolean isCurrent = cur == this.current;
-			Motion motion = this.motionList.get(cur);
-
-			motion.setReduction(!isCurrent);
-			list.add(motion);
-			if (isCurrent) {
-				break;
+		if (0 < sign) {
+			for (; cur != this.current;) {
+				cur += sign;
+				motion = this.motionList.get(cur);
+				motion.setReduction(true);
+				list.add(motion);
+			}
+		} else {
+			for (; cur != this.current;) {
+				motion = this.motionList.get(cur);
+				motion.setReduction(true);
+				list.add(motion);
+				cur += sign;
 			}
 		}
+		if (motion != null) {
+			motion.setReduction(false);
+		}
 		this.previous = this.current;
+		return list;
+	}
+
+	/**
+	 * Get motion for JSON.
+	 * @return motion list
+	 */
+	public List<List<Double[]>> getMotion() {
+		List<List<Double[]>> list = new ArrayList<>();
+
+		for (Motion motion : this.motionList) {
+			List<Double[]> boneList = new ArrayList<>();
+
+			for (MotionBone bone : motion) {
+				Rotation rotation = bone.getTheta();
+
+				if (bone instanceof MotionRoot) {
+					MotionRoot root = (MotionRoot) bone;
+					P3D pt = root.getPoint();
+
+					boneList.add(new Double[] {
+							rotation.x, rotation.y, rotation.z,
+							Double.valueOf(pt.x), Double.valueOf(pt.y), Double.valueOf(pt.z), });
+				} else {
+					boneList.add(new Double[] { rotation.x, rotation.y, rotation.z });
+				}
+			}
+			list.add(boneList);
+		}
 		return list;
 	}
 
@@ -71,6 +110,7 @@ public final class Anima {
 	/**
 	 * @return the motionList
 	 */
+	@JSONHint(ignore = true)
 	public List<Motion> getMotionList() {
 		return this.motionList;
 	}

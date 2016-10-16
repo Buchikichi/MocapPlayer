@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 
+import net.arnx.jsonic.JSONHint;
 import to.kit.mocap.struct.Skeleton.CalcOrder;
 
 /**
@@ -16,8 +17,9 @@ import to.kit.mocap.struct.Skeleton.CalcOrder;
 public abstract class SkeletonNode {
 	private String name;
 	private int depth;
+	private String order;
 	private SkeletonNode parent;
-	private List<SkeletonNode> joint = new ArrayList<>();
+	private final List<SkeletonNode> joint = new ArrayList<>();
 	private final Rotation axis = new Rotation();
 	protected RealMatrix axisMatrix = Radian.NO_EFFECT;
 	protected RealMatrix thetaMatrix = Radian.NO_EFFECT;
@@ -119,6 +121,7 @@ public abstract class SkeletonNode {
 	/**
 	 * @return the parent
 	 */
+	@JSONHint(ignore = true)
 	public SkeletonNode getParent() {
 		return this.parent;
 	}
@@ -160,5 +163,17 @@ public abstract class SkeletonNode {
 	 */
 	public void setTranslate(P3D value) {
 		this.translate = value;
+	}
+	/**
+	 * @return the order
+	 */
+	public String getOrder() {
+		return this.order;
+	}
+	/**
+	 * @param order the order to set
+	 */
+	public void setOrder(String order) {
+		this.order = order;
 	}
 }
