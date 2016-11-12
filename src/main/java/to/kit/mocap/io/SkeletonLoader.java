@@ -23,10 +23,9 @@ import to.kit.mocap.struct.SkeletonRoot;
  * @author Hidetaka Sasai
  */
 public final class SkeletonLoader implements Loader {
-	private Skeleton skeleton = new Skeleton();
+	private Skeleton skeleton;
 	private String section;
 	private String segment;
-	private SkeletonRoot root;
 	private SkeletonBone bone;
 	private int cnt;
 
@@ -48,22 +47,27 @@ public final class SkeletonLoader implements Loader {
 		for (String val : param) {
 			position[ix++] = NumberUtils.toDouble(val);
 		}
-		this.root.setPosition(position);
+		this.skeleton.getRoot().setPosition(position);
 	}
 
 	private void processRoot(String[] param) {
-		if (this.root == null) {
-			this.root = new SkeletonRoot("root");
-			this.skeleton.add(this.root);
+		SkeletonRoot root;
+
+		if (this.skeleton.getRoot() == null) {
+			root = new SkeletonRoot("root");
+			this.skeleton.add(root);
+		} else {
+			root = this.skeleton.getRoot();
 		}
 		if ("axis".equals(this.segment)) {
-			this.root.setAxisOrder(param[0]);
+			root.setAxisOrder(param[0]);
 		} else if ("order".equals(this.segment)) {
-			this.root.setOrder(param[0]);
+			root.setOrder(param[0]);
+			root.setOrder("zyx"); // TODO 正しく設定
 		} else if ("position".equals(this.segment)) {
 			processPosition(param);
 		} else if ("orientation".equals(this.segment)) {
-			this.root.setOrientation(param[0]);
+			root.setOrientation(param[0]);
 		}
 	}
 
@@ -109,6 +113,8 @@ public final class SkeletonLoader implements Loader {
 				axis.z = val;
 			}
 		}
+		//this.bone.setOrder(StringUtils.join(order, StringUtils.EMPTY).toLowerCase());
+		this.bone.setOrder("zyx"); // TODO 正しく設定
 	}
 
 	private void processLimit(String[] param) {
@@ -162,6 +168,7 @@ public final class SkeletonLoader implements Loader {
 	 */
 	@Override
 	public void load(File file) {
+		this.skeleton = new Skeleton();
 		this.skeleton.setScale(10);
 		try (BufferedReader in = new BufferedReader(new FileReader(file))) {
 			for (;;) {
@@ -200,7 +207,7 @@ public final class SkeletonLoader implements Loader {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		adjustDirection(this.root);
+		adjustDirection(this.skeleton.getRoot());
 	}
 
 	@Override

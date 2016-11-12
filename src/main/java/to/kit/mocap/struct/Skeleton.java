@@ -2,13 +2,13 @@ package to.kit.mocap.struct;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+
+import net.arnx.jsonic.JSONHint;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import net.arnx.jsonic.JSONHint;
 
 /**
  * Skeleton.
@@ -23,7 +23,7 @@ public final class Skeleton {
 	private Color color = Color.LIGHT_GRAY;
 	private CalcOrder calcOrder = CalcOrder.RotateTranslate;
 	private double scale = 1;
-	private Map<String, SkeletonNode> nodeMap = new HashMap<>();
+	private final Map<String, SkeletonNode> nodeMap = new LinkedHashMap<>();
 	double rotateH;
 	double rotateV;
 
@@ -65,16 +65,19 @@ public final class Skeleton {
 		this.root.setThetaMatrix(theta.getMatrix());
 	}
 
-	public SkeletonNode getNode(String name) {
-		if (!this.nodeMap.containsKey(name)) {
-			LOG.error("Bad parent name [{}].", name);
+	public SkeletonNode getNode(String nodeName) {
+		if (!this.nodeMap.containsKey(nodeName)) {
+			LOG.error("Bad parent name [{}].", nodeName);
 			return null;
 		}
-		return this.nodeMap.get(name);
+		return this.nodeMap.get(nodeName);
 	}
 
 	public void shift(Motion motion, int direction) {
 		for (MotionBone motionBone : motion) {
+			if (motionBone == null) {
+				continue;
+			}
 			if (motionBone instanceof MotionRoot) {
 				setRootPoint((MotionRoot) motionBone, direction);
 				continue;
@@ -175,6 +178,13 @@ public final class Skeleton {
 	 */
 	public void setScale(double scale) {
 		this.scale = scale;
+	}
+	/**
+	 * @return
+	 */
+	@JSONHint(ignore = true)
+	public Map<String, SkeletonNode> getNodeMap() {
+		return this.nodeMap;
 	}
 	/**
 	 * @param rad the rotateH to set

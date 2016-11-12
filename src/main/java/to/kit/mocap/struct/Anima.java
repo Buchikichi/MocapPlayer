@@ -62,6 +62,10 @@ public final class Anima {
 			List<Double[]> boneList = new ArrayList<>();
 
 			for (MotionBone bone : motion) {
+				if (bone == null) {
+					boneList.add(null);
+					continue;
+				}
 				Rotation rotation = bone.getTheta();
 
 				if (bone instanceof MotionRoot) {

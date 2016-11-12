@@ -29,6 +29,7 @@ public final class MocapConverterMain {
 		try (FileWriter out = new FileWriter(file)) {
 			out.write(json);
 		}
+		this.anima.getMotionList().clear();
 	}
 
 	private boolean load(File file){

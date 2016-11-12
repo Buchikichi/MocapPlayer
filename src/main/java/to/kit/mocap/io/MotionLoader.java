@@ -8,6 +8,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -20,6 +22,7 @@ import to.kit.mocap.struct.P3D;
 import to.kit.mocap.struct.Rotation;
 import to.kit.mocap.struct.Skeleton;
 import to.kit.mocap.struct.SkeletonBone;
+import to.kit.mocap.struct.SkeletonNode;
 
 /**
  * Motion loader.
@@ -30,6 +33,20 @@ public final class MotionLoader implements Loader {
 	private static final Logger LOG = LoggerFactory.getLogger(MotionLoader.class);
 	private Skeleton skeleton;
 	private List<Motion> motionList = new ArrayList<>();
+
+	/**
+	 * JSON書き出し用に並び替え.
+	 */
+	private void orderMotion() {
+		for (Motion motion : this.motionList) {
+			Map<String, MotionBone> motionMap = motion.getMap();
+
+			motion.clear();
+			for (Entry<String, SkeletonNode> entry : this.skeleton.getNodeMap().entrySet()) {
+				motion.add(motionMap.get(entry.getKey()));
+			}
+		}
+	}
 
 	private void loadDegrees(Rotation theta, String[] param, String[] dof) {
 		Double[] values = new Double[3];
@@ -73,6 +90,7 @@ public final class MotionLoader implements Loader {
 		Motion motion = null;
 		P3D prev = null;
 
+		this.motionList.clear();
 		try (BufferedReader in = new BufferedReader(new FileReader(file))) {
 			for (;;) {
 				String line = in.readLine();
@@ -130,6 +148,7 @@ public final class MotionLoader implements Loader {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		orderMotion();
 	}
 
 	@Override

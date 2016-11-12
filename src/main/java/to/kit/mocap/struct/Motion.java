@@ -1,8 +1,10 @@
 package to.kit.mocap.struct;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import net.arnx.jsonic.JSONHint;
 
@@ -11,7 +13,8 @@ import net.arnx.jsonic.JSONHint;
  * @author Hidetaka Sasai
  */
 public final class Motion implements Iterable<MotionBone> {
-	private List<MotionBone> list = new ArrayList<>();
+	private final List<MotionBone> list = new ArrayList<>();
+	private final Map<String, MotionBone> map = new HashMap<>();
 	private boolean isReduction;
 
 	/**
@@ -20,11 +23,26 @@ public final class Motion implements Iterable<MotionBone> {
 	 */
 	public void add(MotionBone bone) {
 		this.list.add(bone);
+		if (bone != null) {
+			this.map.put(bone.getName(), bone);
+		}
+	}
+
+	public void clear() {
+		this.list.clear();
 	}
 
 	@Override
 	public Iterator<MotionBone> iterator() {
 		return this.list.iterator();
+	}
+
+	/**
+	 * @return
+	 */
+	@JSONHint(ignore=true)
+	public Map<String, MotionBone> getMap() {
+		return this.map;
 	}
 
 	/**
